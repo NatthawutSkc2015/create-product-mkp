@@ -8,7 +8,7 @@ let omniCenterSecret = '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff
 const envs = [
     {
         id: 'LOCAL',
-        name: 'Locale',
+        name: 'Localhost',
         url: 'http://localhost:4000',
         key: 'ab1049847e957ba4',
         secret: '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d',
