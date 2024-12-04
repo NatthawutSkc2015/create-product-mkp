@@ -14,6 +14,13 @@ const envs = [
         secret: '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d',
     },
     {
+        id: 'DEV',
+        name: 'Dev',
+        url: 'https://dev-api.syncorder.co',
+        key: '8619ebad17c092a4',
+        secret: '8aa025e228952d353302a025f5f8935458d65ac3b293c384b4b4d1c89011bdde',
+    },
+    {
         id: 'UAT',
         name: 'Uat',
         url: 'https://uat-api.syncorder.co',
