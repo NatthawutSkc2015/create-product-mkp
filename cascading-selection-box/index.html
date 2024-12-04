@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jQuery Cascader Plugin Example</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/quartz/bootstrap.min.css" />
+    <link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="./cascader.css" type="text/css">
+</head>
+
+<body>   <div id="jquery-script-menu">
+<div class="jquery-script-center">
+<ul>
+<li><a href="https://www.jqueryscript.net/form/cascading-selection-box.html">Download This Plugin</a></li>
+<li><a href="https://www.jqueryscript.net/">Back To jQueryScript.Net</a></li>
+</ul><div id="carbon-block"></div>
+<div class="jquery-script-ads"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2783044520727903"
+     crossorigin="anonymous"></script>
+<!-- jQuery_demo -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-2783044520727903"
+     data-ad-slot="2780937993"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+<div class="jquery-script-clear"></div>
+</div>
+</div>
+    <div class="container" style="margin:150px auto">
+		<h3>jQuery Cascader Plugin Example</h3>
+    <p class="lead">This jQuery plugin generates a user-friendly, multi-column cascading dropdown list from an array of JS objects and allows you to append it to any text field within the document. </p>
+    <!-- Create an input field on the page -->
+    <input type="text" id="test"/>
+
+    </div>
+    <!-- Load the necessary jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+    <!-- Load the cascader plugin's JavaScript -->
+    <script src="./cascader.js"></script>
+    <!-- Load data -->
+    <script src="./languages.js"></script>
+    <script>
+        $(function(){
+          // parse the data
+          languages.forEach(function(item){
+            item.label = item.name
+            item.value = item.indexcode
+            item.children = item.s
+            item.s.forEach(function(item2){
+              item2.label = item2.name
+              item2.value = item2.indexcode
+              if (item2.s && item2.s.length) {
+                item2.children = item2.s
+                item2.s.forEach(function(item3){
+                  item3.label = item3.name
+                  item3.value = item3.indexcode
+                })
+              }
+            })
+          })
+          // initialize the plugin on the input field and done
+          $('#test').zdCascader({
+            data: languages,
+            container: '#test',
+            onChange: function(value, label, datas){
+              console.log(label)
+              // console.log(value, label, datas);
+            }
+          });
+        })
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1VDDWMRSTH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1VDDWMRSTH');
+</script>
+<script>
+try {
+  fetch(new Request("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", { method: 'HEAD', mode: 'no-cors' })).then(function(response) {
+    return true;
+  }).catch(function(e) {
+    var carbonScript = document.createElement("script");
+    carbonScript.src = "//cdn.carbonads.com/carbon.js?serve=CK7DKKQU&placement=wwwjqueryscriptnet";
+    carbonScript.id = "_carbonads_js";
+    document.getElementById("carbon-block").appendChild(carbonScript);
+  });
+} catch (error) {
+  console.log(error);
+}
+</script>
+</body>
+
+</html>
