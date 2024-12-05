@@ -2,9 +2,11 @@
 // ============== Global Variable ==================
 let shopId = ''
 let shopName = ''
-let omniCenterUrl = 'http://localhost:4000'
-let omniCenterKey = 'ab1049847e957ba4'
-let omniCenterSecret = '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d'
+let platformName = ''
+let omniCenterUrl = ''
+let omniCenterKey = ''
+let omniCenterSecret = ''
+
 const envs = [
     {
         id: 'LOCAL',
@@ -265,16 +267,18 @@ function productSizeByCarier(el) {
 }
 async function renderAttributes(categoryId, getBrands) {
     // Get Attribute
-    switch (shopId) {
-        case '65092e88a68fc8e47dbd3e18': //lazada
-            const getAttributeByCategory = await requestData('get', '/api/v1/products/attributes', {
+    let attributesHtml = ''
+    let getAttributeByCategory
+    let attrs = []
+    switch (platformName) {
+        case 'Lazada': //lazada
+            getAttributeByCategory = await requestData('get', '/api/v1/products/attributes', {
                 category_id: categoryId
             })
             if (getAttributeByCategory.status == false) {
                 return openPopup(JSON.signature(getAttributeByCategory.data, true))
             }
-            let attributesHtml = ''
-            let attrs = getAttributeByCategory.data.data.filter(attr => attr.is_requried)
+            attrs = getAttributeByCategory.data.data.filter(attr => attr.is_requried)
             for (const attr of attrs) {
                 attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">*required</span></label>`
                 switch (attr.input_type) {
@@ -285,7 +289,8 @@ async function renderAttributes(categoryId, getBrands) {
                         attributesHtml += `<input type="number" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}" value="30">`
                         break
                     case 'singleSelect':
-                        attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.name}" placeholder="${attr.label}" name="attributes.${attr.name}">`
+                        attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.name}" placeholder="${attr.label}">`
+                        attributesHtml += `<option value=""></option>`
                         if (Array.isArray(attr.options)) {
                             for (const opt of attr.options) {
                                 attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
@@ -321,11 +326,34 @@ async function renderAttributes(categoryId, getBrands) {
                 }
                 attributesHtml += '</div>'
             }
-            areaProductAttributes.innerHTML = attributesHtml
             break
-        case '66cd6d284fcb64a00fe50b3c': //tiktok
+        case 'Tiktok Shop': //tiktok
+            getAttributeByCategory =await requestData('get', '/api/v1/products/attributes', {
+                category_id: categoryId
+            })
+            if (getAttributeByCategory.status == false) {
+                return openPopup(JSON.signature(getAttributeByCategory.data, true))
+            }
+            attrs = getAttributeByCategory.data.data
+            for (const attr of attrs) {
+                attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">${ attr.is_requried ? '*required' : '' }</span></label>`
+                if (Array.isArray(attr.options)) { //select option
+                    attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.id}" placeholder="${attr.label}" >`
+                    attributesHtml += `<option value="">------ None ------</option>`
+                    if (Array.isArray(attr.options)) {
+                        for (const opt of attr.options) {
+                            attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
+                        }
+                    }
+                    attributesHtml += `</select>`
+                } else { //text
+                    attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.id}">`
+                }
+                attributesHtml += '</div>'
+            }
             break
     }
+    areaProductAttributes.innerHTML = attributesHtml
 }
 
 
@@ -340,24 +368,33 @@ inputEnv.addEventListener('change',async (e) => {
     if (getShopAll.status) {
         swal.close()
         inputShop.innerHTML = '<option>------ None ------</option>'
-        for (const shop of getShopAll.data.data) {
+        const shops = getShopAll.data.data.filter(shop => shop.status)
+        for (const shop of shops) {
             let shopName = ''
+            let platform = ''
             if (shop.hasOwnProperty('tiktok_shop')) {
-                shopName = `[Tiktok] - ${shop.tiktok_shop.shop.shop_name}`
+                shopName = `${shop.tiktok_shop.shop.shop_name}`
+                platform = `Tiktok Shop`
             } else if (shop.hasOwnProperty('shopee')) {
-                shopName = `[Shopee] - ${shop.shopee.info.shop_name}`
+                shopName = `${shop.shopee.info.shop_name}`
+                platform = `Shopee`
             } else if (shop.hasOwnProperty('lazada')) {
-                shopName = `[Lazada] - ${shop.lazada.info.shop_name}`
+                shopName = `${shop.lazada.info.shop_name}`
+                platform = `Lazada`
             } else if (shop.hasOwnProperty('line_myshop')) {
-                shopName = `[Line Myshop] - ${shop.line_myshop.shop_name}`
+                shopName = `${shop.line_myshop.shop_name}`
+                platform = `Line Myshop`
             } else if (shop.hasOwnProperty('woo_commerce')) {
-                shopName = `[Woo Commerce] - ${shop.woo_commerce.shop_name}`
+                shopName = `${shop.woo_commerce.shop_name}`
+                platform = `Woo Commrece`
             } else if (shop.hasOwnProperty('magento2')) {
-                shopName = `[Magento] - ${shop.magento2.shop_name}`
+                shopName = `${shop.magento2.shop_name}`
+                platform = `Magento`
             }
             const opt = document.createElement('option');
             opt.value = shop.id
-            opt.innerHTML = shopName
+            opt.setAttribute('data-platform', platform)
+            opt.innerHTML = `${platform} - ${shopName}`
             inputShop.appendChild(opt)
         }
     }
@@ -366,6 +403,9 @@ inputEnv.addEventListener('change',async (e) => {
 
 // ============= Event : Select Platform ===================
 inputShop.addEventListener('change',async (e) => {
+    const selectedOption = inputShop.options[inputShop.selectedIndex]
+    platformName = selectedOption.getAttribute('data-platform')
+
     shopId = e.target.value
     shopName = e.target.options[e.target.selectedIndex].text
     openPopup('Loading Category...')
@@ -427,7 +467,7 @@ inputShop.addEventListener('change',async (e) => {
             })
 
             // Get Brand
-            brand.innerHTML = ''
+            brand.innerHTML = '<option value="">------ None ------</option>'
             await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })
             if (getBrands.status == true) {
                 swal.close()
@@ -459,8 +499,8 @@ inputShop.addEventListener('change',async (e) => {
     formWeight.classList.remove('d-none')
     formPrice.classList.remove('d-none')
     
-    switch (shopId) {
-        case '65092d6e4873f03c5a5aba12': //shopee
+    switch (platformName) {
+        case 'Shopee': //shopee
             formStatus.classList.remove('d-none')
             formFormOpenCod.classList.remove('d-none')
             for (const obj of statusesProduct.shopee) {
@@ -484,9 +524,9 @@ inputShop.addEventListener('change',async (e) => {
             }
             formLogistics.classList.remove('d-none')
             break
-        case '66cd6d284fcb64a00fe50b3c': //tiktok
+        case 'Tiktok Shop': //tiktok
             break
-        case '65092da54873f03c5a5aba26': //line 
+        case 'Line Myshop': //line 
             formStatus.classList.remove('d-none')
             for (const obj of statusesProduct.line_myshop) {
                 const opt = document.createElement('option');
@@ -495,7 +535,7 @@ inputShop.addEventListener('change',async (e) => {
                 inputStatus.appendChild(opt)
             }
             break
-        case '65092e88a68fc8e47dbd3e18': //lazada
+        case 'Lazada': //lazada
             formHeight.classList.add('d-none')
             formLength.classList.add('d-none')
             formWidth.classList.add('d-none')
@@ -539,7 +579,7 @@ formCreate.addEventListener('submit', async (el) => {
         const keys = path.replace(/\[(\w+)\]/g, '.$1').split('.')
         keys.reduce((o, key, i) => {
             if (i === keys.length - 1) o[key] = value
-            else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : []);
+            else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : {});
             return o[key];
         }, obj)
     }
@@ -547,21 +587,46 @@ formCreate.addEventListener('submit', async (el) => {
     const formData = new FormData(formCreate)
     for (const [key, value] of formData.entries()) {
         const input = formCreate.querySelector(`[name="${key}"]`)
+        console.log(`[name="${key}"]`)
+        console.log(input)
         if (input && input.type === "checkbox") {
-            const checkedCheckboxes = Array.from(formCreate.querySelectorAll(`[name="${key}"]:checked`)).map(checkbox => checkbox.id);
+            const checkedCheckboxes = Array.from(
+                formCreate.querySelectorAll(`[name="${key}"]:checked`)
+            ).map(checkbox => checkbox.id);
             setValue(paramsCreate, key, checkedCheckboxes);
         } else if (input && input.type === "radio") {
             const checkedRadio = formCreate.querySelector(`[name="${key}"]:checked`);
             setValue(paramsCreate, key, checkedRadio ? checkedRadio.id : null)
+        } else if (input.tagName == "SELECT") {
+            let selectedOptions
+            if (platformName == 'Tiktok Shop' && key.match(/attributes.*/)) {
+                if (input.type == 'select-multiple') {
+                    selectedOptions = Array.from(input.selectedOptions).map((option) => {
+                        return {
+                            id: option.value,
+                            name: option.innerText
+                        }
+                    })
+                    setValue(paramsCreate, key, selectedOptions)
+                } else if (input.type == 'select-one') {
+                    if (value) {
+                        setValue(paramsCreate, key, value)
+                    }
+                }
+            } else {
+                selectedOptions = value
+            }
+            setValue(paramsCreate, key, selectedOptions)
         } else {
             setValue(paramsCreate, key, value)
         }
     }
-
+    console.log(paramsCreate)
     // Validate 
     if (shopId == '') {
         return openPopup('please select shop !', true)
     }
+    
     if (paramsCreate.category == '') {
         return openPopup('please select category !', true)
     }
@@ -597,8 +662,8 @@ formCreate.addEventListener('submit', async (el) => {
     }
 
 
-    switch (shopId) {
-        case '65092d6e4873f03c5a5aba12': //shopee
+    switch (platformName) {
+        case 'Shopee': //shopee
             if (logisticsSelect.length == 0) {
                 openPopup('please select logistic !', true)
                 return
@@ -620,9 +685,17 @@ formCreate.addEventListener('submit', async (el) => {
             }
             paramsCreate.logistics = logistics
             break
+        case 'Tiktok Shop':
+            paramsCreate.attributes = Object.keys(paramsCreate.attributes).map(attr => {
+                return {
+                    id: attr,
+                    value: paramsCreate.attributes[attr]
+                }
+            })
+            break
+
     }
     
-
     //Sent to create product
     openPopup('Send data to create product...')
     const responseCreateProduct = await requestData('post', '/api/v1/products/create', {}, paramsCreate)
