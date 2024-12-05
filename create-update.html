@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tools test create product MKP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="./cascading-selection-box/cascader.css" type="text/css">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .table tbody tr td:nth-child(1){
+            width: 15%!important;
+            vertical-align: middle; 
+            /* text-align: right; */
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid mt-2">
+        <div class="row">
+            <div class="col-8">
+                <h1>Create-update product MKP</h1>
+                <form id="FormCreate">
+                    <table class="table create-product table-bordered mt-5">
+                        <tr>
+                            <td colspan="2" class="text-center"><h5>Select Platform</h5></td>
+                        </tr>
+                        <tr>
+                            <td><label for="">ENV</label></td>
+                            <td>
+                                <select class="form-control form-control-sm" id="env">
+                                    <option value="">------ None ------</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr class="">
+                            <td><label for="">Shop</label></td>
+                            <td>
+                                <select class="form-control form-control-sm" id="shop">
+                                    <option value="">------ None ------</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table table-bordered mt-2">
+                        <tbody>
+                            <tr>
+                                <td colspan="2" class="text-center"><h5>Prepare data</h5></td>
+                            </tr>
+                            <tr class="">
+                                <td><label for="">Category</label></td>
+                                <td id="form_cate_cascader">
+                                    <input type="text" id="category-cascader-menu" class="zd-input__inner" readonly="" value="Select category">
+                                    <input type="hidden" name="category">
+                                </td>
+                                <!-- <td id="form_cate_normal" class="d-none">
+                                    <select class="form-control form-control-sm" id="cate-normal">
+                                        <option value="">------ None ------</option>
+                                    </select>
+                                </td> -->
+                            </tr>
+                            <tr class="">
+                                <td><label for="">Name</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="product_name" required>
+                                </td>
+                            </tr>
+                            <tr id="form_attributes">
+                                <td><label for="">Attribues</label></td>
+                                <td><div id="area_product_attributes" class="row"></div></td>
+                            </tr>
+                            <tr class="">
+                                <td><label for="">Image</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="file" class="form-control form-control-sm" name="image" onchange="uploadPicture(this)" accept="image/png,image/jpeg">
+                                    <img src="" class="preview-img mt-2" style="width: 20%;">
+                                </td>
+                            </tr>
+                            <tr class="">
+                                <td><label for="">Brand</label> <small class="text-primary"> *options</small></td>
+                                <td>
+                                    <select class="form-control form-control-sm" name="brand" id="brand">
+                                        <option value="">------ None ------</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Sku name</label class="text-primary"> <small class="text-primary">*options</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="product_sku">
+                                </td>
+                            </tr>
+                            <tr id="form_status" class="d-none">
+                                <td style="background-color:#f9db85;">Status <small class="text-danger">*[Shopee, Line]</small></td>
+                                <td style="background-color:#f9db85;">
+                                    <select class="form-control form-control-sm" name="status" >
+                                        <option value="">------ None ------</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Description</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="description">
+                                </td>
+                            </tr>
+                            <tr id="form_price">
+                                <td><label for="">Price</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="price" value="100" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Skus</label> (Product children)</td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="has_children">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="form_skus" class="d-none">
+                                <td><label for="">Skus</label> <small class="text-danger">*Required</small></td>
+                                <td id="form_skus_body">
+                                    <div class="row p-3 child" style="margin: calc(-.35 * var(--bs-gutter-x));">
+                                        <!-- <div class="col-3">
+                                            <label for="">name</label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="name" name="skus[0][name]" id="" required value="product child 1">
+                                        </div> -->
+                                        <div class="col-2">
+                                            <label for="">Sku</label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="sku" name="skus[0][sku]" id="" value="Sku child 1" value="product sku 1">
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="">quantity</label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="qty" name="skus[0][quantity]" id="" required value="10">
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="">Price</label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="price" name="skus[0][price]" id="" required value="30">
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="">Weight</label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="weight" name="skus[0][weight]" id="" required value="1">
+                                        </div>
+                                        <div class="col-3">
+                                            <label for="">Image</label>
+                                            <input type="file" class="form-control form-control-sm upload-image" placeholder="image" name="skus[0][image]" onchange="uploadPicture(this)">
+                                            <img src="" class="preview-img mt-2 w-100">
+                                        </div>
+                                        <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-primary btn-sm" id="add_sku">+</button></div>
+                                        
+                                        <div class="col-12 attrs mt-2">
+                                            <label for="">
+                                                Attribues
+                                                <small class="text-danger">Tiktok Max 3 variant | Shopee Max 2 variant</small>
+                                            </label>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[0][sales_attributes][0][name]" id="" value="Color" required>
+                                                </div>
+                                                <div class="col-5">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[0][sales_attributes][0][value]" id="" value="Black" required>
+                                                </div>
+                                                <div class="col-1">
+                                                    <button type="button" type="text" class="btn btn-secondary btn-sm" onclick="addAttr(this)">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="">
+                                <td><label for="">Quantity</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="quantity" value="10" required>
+                                </td>
+                            </tr>
+                            <tr id="form_height">
+                                <td><label for="">height</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="height" value="0">
+                                </td>
+                            </tr>
+                            <tr id="form_length">
+                                <td><label for="">length</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="length" value="0">
+                                </td>
+                            </tr>
+                            <tr id="form_width">
+                                <td><label for="">width</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="width" value="0">
+                                </td>
+                            </tr>
+                            <tr id="form_weight">
+                                <td><label for="">weight</label> <small class="text-danger">*Required</small></td>
+                                <td>
+                                    <input type="input" class="form-control form-control-sm" name="weight" value="0">
+                                </td>
+                            </tr>
+                            <tr id="form_logistics" class="d-none">
+                                <td style="background-color:#f9db85;">
+                                    <label for="">Logistics</label> <small class="text-danger">*[Shopee]</small>
+                                </td>
+                                <td style="background-color:#f9db85;">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label for="">Carier logictic</label>
+                                            <select class="form-control form-control-sm" id="logistics" onchange="productSizeByCarier(this)" style="height:  200px;" multiple>
+                                                <option value="">------ None ------</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label for="">Product size</label>
+                                            <div id="area_product_size"></div>
+                                        </div>
+                                    </div>
+                                </td> 
+                            </tr>
+                            <tr id="form_open_cod" class="d-none">
+                                <td style="background-color:#f9db85;">
+                                    <label for="">Open COD</label>
+                                    <small class="text-danger">*[Shopee]</small>
+                                </td>
+                                <td style="background-color:#f9db85;">
+                                    <input class="form-check-input" type="checkbox" name="is_cod">
+                                </td> 
+                            </tr>
+                            <tr class="">
+                                <td></td>
+                                <td>
+                                    <button id="submitForm" class="btn btn-primary">Submit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="col-4">
+                <h3>Body</h3>
+                <div id="bodyCreateProduct"></div>
+                <hr>
+                <h3>Result</h3>
+                <div id="respnseCreateProduct"></div>
+            </div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+    <script src="./cascading-selection-box/cascader.js"></script>
+    <script src="./global.js"></script>
+    <script src="./create-update.js"></script>
+  </body>
+</html>
