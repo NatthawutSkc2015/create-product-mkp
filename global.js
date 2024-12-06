@@ -24,7 +24,7 @@ const envs = [
     {
         id: 'LOCAL',
         name: 'Localhost',
-        url: 'http://192.168.1.52:4000',
+        url: 'http://127.0.0.1:4000',
         key: 'ab1049847e957ba4',
         secret: '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d',
     },
