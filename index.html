@@ -32,11 +32,15 @@
             position: sticky;
             top: 0;
             z-index: 2;
-            background: #009688;
+            background: #02877a;
 	        color: #fff;
         }
-        #productsList > tbody > tr > td > table > thead > tr > th{
-            background: #017469;
+        #productsList > tbody > tr > td > table.detail > tbody th{
+            background: #036158;
+            color: #FFF;
+        }
+        #productsList > tbody > tr > td > table.skus > thead > tr > th{
+            background: #036158;
             color: #fff;
             position: sticky;
             top: 37px;
@@ -86,7 +90,6 @@
                     <table class="table table-bordered table-hover mt-2" id="productsList">
                         <thead>
                             <tr>
-                                <th style="width: 14%;">ID / Created</th>
                                 <th style="width: 5%;">Image</th>
                                 <th >Name</th>
                                 <th style="width: 5%;">Attributes</th>

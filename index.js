@@ -8,12 +8,6 @@ function renderTableProducts () {
         html += '<tr>'
             html += `
                 <td>
-                    <div><b style="color: #017469">ID : ${ product.mkp_id }</b></div>
-                    <div>Created : ${product.created}</div>
-                </td>
-            `
-            html += `
-                <td>
                     <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-parent','${product.id}')">
                         <i class="bi bi-info-circle-fill"></i> 
                     </button>
@@ -51,35 +45,53 @@ function renderTableProducts () {
             html += '<tr>'
                 html += '<td></td>'
                 html += '<td colspan="10" class="p-0">'
-                    html += '<div><b>Data</b></div>'
-                    html += `<table class="table table-bordered table-hover mt-2">`
-                        html += '<thead>'
-                            html += '<tr>'
-                                html += '<th>Category</th>'
-                                html += '<th>Brand</th>'
-                                html += '<th>Weight</th>'
-                                html += '<th>Width</th>'
-                                html += '<th>Height</th>'
-                                html += '<th>Length</th>'
-                                html += '<th>Option logistic</th>'
-                                html += '<th>Open COD</th>'
-                            html += '</tr>'
-                        html += '</thead>'
+                    html += '<div><b>Detail</b></div>'
+                    html += `<table class="table table-bordered table-hover mt-2 detail">`
                         html += '<tbody>'
                             html += '<tr>'
+                                html += '<th style="width: 10%;">Created</th>'
+                                html += `<td>${ product.created }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">ID</th>'
+                                html += `<td>${ product.mkp_id }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Category</th>'
                                 html += `<td>${ product.category }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Brand</th>'
                                 html += `<td>${ product.brand }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Weight</th>'
                                 html += `<td>${ product.weight }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Width</th>'
                                 html += `<td>${ product.width }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Height</th>'
                                 html += `<td>${ product.height }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Length</th>'
                                 html += `<td>${ product.length }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Option logistic</th>'
                                 html += `<td>${ product.option_logistic }</td>`
+                            html += '</tr>'
+                            html += '<tr>'
+                                html += '<th style="width: 10%;">Open COD</th>'
                                 html += `<td>${ product.open_cod }</td>`
                             html += '</tr>'
                         html += '</tbody>'
                     html += `</table>`
-                    html += '<div><b>Children</b></div>'
-                    html += '<table class="table table-bordered table-hover mt-2">'
+                    html += '<div><b>Product skus</b></div>'
+                    html += '<table class="table table-bordered table-hover mt-2 skus">'
                         html += `
                             <thead>
                                 <th style="width: 5%;">ID</th>
