@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./style.css">
     <style>
         :root{ 
-            --bs-border-color: #009688;
+            --bs-border-color: #0f8d80;
         }
         #productsList {
             /* min-width: 220px; */
@@ -25,6 +25,9 @@
             text-align: justify;
             font-size: 14px;
         } */
+        #productsList {
+            min-width: 1875px;
+        }
         #productsList > thead > tr > th {
             position: sticky;
             top: 0;
@@ -79,24 +82,26 @@
                 </div>
 
                 <h5>Product List</h5>
-                <table class="table table-bordered table-hover mt-2" id="productsList">
-                    <thead>
-                        <tr>
-                            <th style="width: 14%;">ID / Created</th>
-                            <th style="width: 5%;">Image</th>
-                            <th >Name</th>
-                            <th style="width: 10%;">Attributes</th>
-                            <th style="width: 15%;">Sku</th>
-                            <th >Description</th>
-                            <th style="width: 5%;">Price</th>
-                            <th style="width: 10%;">Quantity</th>
-                            <th style="width: 7%;">Status</th>
-                            <th style="width: 7%;">Type</th>
-                            <th style="width: 12%;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div>
+                    <table class="table table-bordered table-hover mt-2" id="productsList">
+                        <thead>
+                            <tr>
+                                <th style="width: 14%;">ID / Created</th>
+                                <th style="width: 5%;">Image</th>
+                                <th >Name</th>
+                                <th style="width: 5%;">Attributes</th>
+                                <th style="width: 10%;">Sku</th>
+                                <th >Description</th>
+                                <th style="width: 5%;">Price</th>
+                                <th style="width: 5%;">Quantity</th>
+                                <th style="width: 7%;">Status</th>
+                                <th style="width: 7%;">Type</th>
+                                <th style="width: 12%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

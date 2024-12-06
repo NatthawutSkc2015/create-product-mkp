@@ -14,20 +14,26 @@ function renderTableProducts () {
             `
             html += `
                 <td>
-                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-parent','${product.id}')">View </button>
+                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-parent','${product.id}')">
+                        <i class="bi bi-info-circle-fill"></i> 
+                    </button>
                 </td>
             `
             html += `<td>${ product.name }</td>`
             html += `
                 <td>
-                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('attributes','${product.id}')">View Detail </button>
+                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('attributes','${product.id}')">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </button>
                 </td>
             `
             html += `<td>${ product.sku }</td>`
             html += `
                 <td>
                     ${ removeTagHtml(product.description).slice(0, 200) + '... <br>' } 
-                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('description','${product.id}')">View Detail </button>
+                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('description','${product.id}')">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </button>
                 </td>
             `
             html += `<td>${ product.price }</td>`
@@ -45,31 +51,58 @@ function renderTableProducts () {
             html += '<tr>'
                 html += '<td></td>'
                 html += '<td colspan="10" class="p-0">'
-                html += '<b>Children</b>'
-                html += '<table class="table table-bordered table-hover mt-2">'
-                    html += `
-                        <thead>
-                            <th style="width: 5%;">ID</th>
-                            <th style="width: 8%;">Image</th>
-                            <th style="width: 30%;">Seller sku</th>
-                            <th>Attributes</th>
-                            <th style="width: 10%;">Price</th>
-                            <th style="width: 10%;">Quantity</th>
-                        </thead>
-                    `
-                    html += '<tbody>'
-                    for (const sku of product.skus) {
-                        html += '<tr>'
-                            html += `<td>${sku.id}</td>`
-                            html += `<td><button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-childrent','${product.id}', '${sku.id}')">View </button></td>`
-                            html += `<td>${sku.sku || '-'}</td>`
-                            html += `<td>${sku.attrs}</td>`
-                            html += `<td>${sku.price}</td>`
-                            html += `<td>${sku.quantity}</td>`
-                        html += '</tr>'
-                    }
-                    html += '</tbody>'
-                html += '</table>'
+                    html += '<div><b>Data</b></div>'
+                    html += `<table class="table table-bordered table-hover mt-2">`
+                        html += '<thead>'
+                            html += '<tr>'
+                                html += '<th>Category</th>'
+                                html += '<th>Brand</th>'
+                                html += '<th>Weight</th>'
+                                html += '<th>Width</th>'
+                                html += '<th>Height</th>'
+                                html += '<th>Length</th>'
+                                html += '<th>Option logistic</th>'
+                                html += '<th>Open COD</th>'
+                            html += '</tr>'
+                        html += '</thead>'
+                        html += '<tbody>'
+                            html += '<tr>'
+                                html += `<td>${ product.category }</td>`
+                                html += `<td>${ product.brand }</td>`
+                                html += `<td>${ product.weight }</td>`
+                                html += `<td>${ product.width }</td>`
+                                html += `<td>${ product.height }</td>`
+                                html += `<td>${ product.length }</td>`
+                                html += `<td>${ product.option_logistic }</td>`
+                                html += `<td>${ product.open_cod }</td>`
+                            html += '</tr>'
+                        html += '</tbody>'
+                    html += `</table>`
+                    html += '<div><b>Children</b></div>'
+                    html += '<table class="table table-bordered table-hover mt-2">'
+                        html += `
+                            <thead>
+                                <th style="width: 5%;">ID</th>
+                                <th style="width: 8%;">Image</th>
+                                <th style="width: 30%;">Seller sku</th>
+                                <th>Attributes</th>
+                                <th style="width: 10%;">Price</th>
+                                <th style="width: 10%;">Quantity</th>
+                            </thead>
+                        `
+                        html += '<tbody>'
+                        for (const sku of product.skus) {
+                            html += '<tr>'
+                                html += `<td>${sku.id}</td>`
+                                html += `<td><button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-childrent','${product.id}', '${sku.id}')">View </button></td>`
+                                html += `<td>${sku.sku || '-'}</td>`
+                                html += `<td>${sku.attrs}</td>`
+                                html += `<td>${sku.price}</td>`
+                                html += `<td>${sku.quantity}</td>`
+                            html += '</tr>'
+                        }
+                        html += '</tbody>'
+                    html += '</table>'
                 html += '</td>'
             html += '</tr>'
         }
@@ -186,6 +219,17 @@ async function loadData() {
                     product.created = moment(product.info.create_time * 1000).format('DD/MM/YYYY HH:mm:ss')
                     product.quantity = '-'
                     product.price = '-'
+                    product.attrs = ''
+                    product.category = product.info.category_list.map(cate => {
+                        return cate.local_name
+                    }).join(' > ')
+                    product.brand = '-'
+                    product.weight = product.info.package_weight + ' km'
+                    product.width = product.info.package_height + ' cm'
+                    product.height = product.info.package_height + ' cm'
+                    product.length = product.info.package_length + ' cm'
+                    product.option_logistic = '-'
+                    product.open_cod = ''
                     product.attrs = ''
                     if (Array.isArray(product.info.product_attributes)) {
                         product.attrs = product.info.product_attributes.map(attr => `<div>${attr.name} : ${ attr.values.map(v => v.name).join('') }</div>`).join('')
