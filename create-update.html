@@ -15,12 +15,15 @@
             /* text-align: right; */
         }
     </style>
+    <script>
+        
+    </script>
   </head>
   <body>
     <div class="container-fluid mt-2">
         <div class="row">
             <div class="col-8">
-                <h1 id="title_page"></h1>
+                <h4 id="title_page"></h4>
                 <form id="FormCreate">
                     <table class="table create-product table-bordered mt-5">
                         <tr>
@@ -51,14 +54,9 @@
                             <tr class="">
                                 <td><label for="">Category</label></td>
                                 <td id="form_cate_cascader">
-                                    <input type="text" id="category-cascader-menu" class="zd-input__inner" readonly="" value="Select category">
+                                    <input type="text" id="category-cascader-menu" class="zd-input__inner" readonly="" placeholder="Select category">
                                     <input type="hidden" name="category">
                                 </td>
-                                <!-- <td id="form_cate_normal" class="d-none">
-                                    <select class="form-control form-control-sm" id="cate-normal">
-                                        <option value="">------ None ------</option>
-                                    </select>
-                                </td> -->
                             </tr>
                             <tr class="">
                                 <td><label for="">Name</label> <small class="text-danger">*Required</small></td>
@@ -73,18 +71,16 @@
                             <tr class="">
                                 <td><label for="">Image</label> <small class="text-danger">*Required</small></td>
                                 <td>
-                                    <div class="box-image">
-                                        <div class="item" onclick="selectImage(this)" data-image="image-1"></div>
-                                        <div class="item" onclick="selectImage(this)" data-image="image-2"></div>
-                                        <div class="item" onclick="selectImage(this)" data-image="image-3"></div>
-                                        <div class="item" onclick="selectImage(this)" data-image="image-4"></div>
-                                        <div class="item" onclick="selectImage(this)" data-image="image-5"></div>
+                                    <div class="box-preview-image">
+                                        <!-- Button Select -->
+                                        <div class="inner select">
+                                          <button type="button" onclick="document.querySelector('#images').click()">
+                                            <img src="plus.png" data-bs-toggle="tooltip" data-bs-placement="right" title="เพิ่มรูป">
+                                          </button>
+                                        </div>
+                                        <!-- ./ Button Select -->
+                                        <input type="file" id="images" id="images[]" accept="image/png, image/jpeg" onchange="previewImage(event)" multiple>
                                     </div>
-                                    <input type="file" class="d-none select-image" id="image-1" accept="image/png,image/gif,image/jpeg">
-                                    <input type="file" class="d-none select-image" id="image-2" accept="image/png,image/gif,image/jpeg">
-                                    <input type="file" class="d-none select-image" id="image-3" accept="image/png,image/gif,image/jpeg">
-                                    <input type="file" class="d-none select-image" id="image-4" accept="image/png,image/gif,image/jpeg">
-                                    <input type="file" class="d-none select-image" id="image-5" accept="image/png,image/gif,image/jpeg">
                                 </td>
                             </tr>
                             <tr class="">
@@ -133,10 +129,6 @@
                                 <td><label for="">Skus</label> <small class="text-danger">*Required</small></td>
                                 <td id="form_skus_body">
                                     <div class="row p-3 child" style="margin: calc(-.35 * var(--bs-gutter-x));">
-                                        <!-- <div class="col-3">
-                                            <label for="">name</label>
-                                            <input type="text" class="form-control form-control-sm" placeholder="name" name="skus[0][name]" id="" required value="product child 1">
-                                        </div> -->
                                         <div class="col-2">
                                             <label for="">Sku</label>
                                             <input type="text" class="form-control form-control-sm" placeholder="sku" name="skus[0][sku]" id="" value="Sku child 1" value="product sku 1">
@@ -155,7 +147,7 @@
                                         </div>
                                         <div class="col-3">
                                             <label for="">Image</label>
-                                            <input type="file" class="form-control form-control-sm upload-image" placeholder="image" name="skus[0][image]" onchange="uploadPicture(this)">
+                                            <input type="file" class="form-control form-control-sm upload-image" placeholder="image" name="skus[0][image]" onchange="selectImage(this)">
                                             <img src="" class="preview-img mt-2 w-100">
                                         </div>
                                         <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-primary btn-sm" id="add_sku">+</button></div>
@@ -238,12 +230,6 @@
                                     <input class="form-check-input" type="checkbox" name="is_cod">
                                 </td> 
                             </tr>
-                            <tr class="">
-                                <td></td>
-                                <td>
-                                    <button id="submitForm" class="btn btn-primary">Submit</button>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </form>
@@ -251,6 +237,9 @@
             <div class="col-4">
                 <h3>Body</h3>
                 <div id="bodyCreateProduct"></div>
+                <div class="text-end">
+                    <button type="button" id="submitForm" class="mt-1 btn btn-primary btn-sm">Send Data</button>
+                </div>
                 <hr>
                 <h3>Result</h3>
                 <div id="respnseCreateProduct"></div>
@@ -266,5 +255,7 @@
     <script src="./cascading-selection-box/cascader.js"></script>
     <script src="./global.js"></script>
     <script src="./create-update.js"></script>
+    <script src="./create.js"></script>
+    <script src="./update.js"></script>
   </body>
 </html>

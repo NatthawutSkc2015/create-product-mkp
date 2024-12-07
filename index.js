@@ -1,7 +1,7 @@
 const noImage = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
 let products = []
 
-function setValueForm() {}
+
 function renderTableProducts () {
     let html = ''
     for (const product of products) {
@@ -450,7 +450,6 @@ inputShop.addEventListener('change', async (e) => {
 
 // ============= Event : Onload page ====================
 document.addEventListener('DOMContentLoaded',async function() {
-    setValueForm()
     for (const env of envs){
         const opt = document.createElement('option');
         opt.value = env.id

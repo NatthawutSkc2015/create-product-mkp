@@ -49,33 +49,21 @@ const formPrice = document.querySelector('#form_price')
 function removeItem(el, action) {
     el.closest('.row').remove()
 }
-function addAttr(el) {
-    const countAttr = el.closest('.attrs').querySelectorAll('.row').length
-    if (countAttr >= 3) {
-        return openPopup('Max 3 Variant', true)
-    }
-    const rootParent = document.querySelector('#form_skus_body')
-    const parent = el.closest('.child')
-    const paramsAll = Array.from(rootParent.querySelectorAll('.child'));
-    const indexParent = paramsAll.indexOf(parent);
-    el.closest('.attrs').insertAdjacentHTML('beforeend', templateFormAttributeSKu(indexParent, countAttr))
-}
 function setValueForm() {
     inputProductName.value = 'Product name ' + shopName
     inputProductSku.value = 'ProductSku'
     inputDescription.value = 'description ' + shopName
     inputWeight.value = Math.floor(Math.random() * 6) + 1
     inputHeight.value = Math.floor(Math.random() * 6) + 1
-    inputWeight.value = Math.floor(Math.random() * 6) + 1
+    inputWidth.value = Math.floor(Math.random() * 6) + 1
     inputLength.value = Math.floor(Math.random() * 6) + 1
-    
 }
-function uploadPicture (el) {
-    const [file] = el.files
-    if (file) {
-        el.closest('div').querySelector('.preview-img').src = URL.createObjectURL(file)
-    }
-}
+// function previewImage (el) {
+//     const [file] = el.files
+//     if (file) {
+//         el.closest('div').querySelector('.preview-img').src = URL.createObjectURL(file)
+//     }
+// }
 function productSizeByCarier(el) {
     const optionSelects = []
     const optionsAll = el.options
@@ -99,9 +87,171 @@ function productSizeByCarier(el) {
     }
     document.querySelector('#area_product_size').innerHTML = htmlSelect
 }
+async function renderAttributes(categoryId) {
+    // Get Attribute
+    let attributesHtml = ''
+    let getAttributeByCategory
+    let attrs = []
+    switch (platformName) {
+        case 'Lazada': //lazada
+            getAttributeByCategory = await requestData('get', '/api/v1/products/attributes', {
+                category_id: categoryId
+            })
+            if (getAttributeByCategory.status == false) {
+                return openPopup(JSON.signature(getAttributeByCategory.data, true))
+            }
+            attrs = getAttributeByCategory.data.data.filter(attr => attr.is_requried)
+            for (const attr of attrs) {
+                attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">*required</span></label>`
+                switch (attr.input_type) {
+                    case 'text':
+                        attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}">`
+                        break
+                    case 'numeric':
+                        attributesHtml += `<input type="number" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}" value="30">`
+                        break
+                    case 'singleSelect':
+                        attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.name}" placeholder="${attr.label}">`
+                        attributesHtml += `<option value=""></option>`
+                        if (Array.isArray(attr.options)) {
+                            for (const opt of attr.options) {
+                                attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
+                            }
+                        }
+                        if (attr.name == 'brand') {
+                            for (const opt of dataBrands.data.data) {
+                                attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
+                            }
+                        }
+                        attributesHtml += `</select>`
+                        break
+                    case 'enumInput':
+                        attributesHtml += `<div class="row m-0 p-2" style="max-height: 300px; overflow-y: scroll; border: 1px solid #8e8a8a; border-radius: 4px;">`
+                        for (const opt of attr.options) {
+                            attributesHtml += `<div class="form-check w-50">`
+                            attributesHtml += `<input class="form-check-input" type="radio" name="attributes.${attr.name}" id="${opt.id}">`
+                            attributesHtml += `<label class="form-check-label" for="">${opt.name}</label>`
+                            attributesHtml += `</div>`
+                        }
+                        attributesHtml += `</div>`
+                        break
+                    case 'multiEnumInput':
+                        attributesHtml += `<div class="row m-0 p-2" style="max-height: 300px; overflow-y: scroll; border: 1px solid #8e8a8a; border-radius: 4px;">`
+                        for (const opt of attr.options) {
+                            attributesHtml += `<div class="form-check w-50">`
+                            attributesHtml += `<input class="form-check-input" type="checkbox" name="attributes.${attr.name}" id="${opt.id}">`
+                            attributesHtml += `<label class="form-check-label" for="">${opt.name}</label>`
+                            attributesHtml += `</div>`
+                        }
+                        attributesHtml += `</div>`
+                        break
+                }
+                attributesHtml += '</div>'
+            }
+            break
+        case 'Tiktok Shop': //tiktok
+            getAttributeByCategory =await requestData('get', '/api/v1/products/attributes', {
+                category_id: categoryId
+            })
+            if (getAttributeByCategory.status == false) {
+                return openPopup(JSON.signature(getAttributeByCategory.data, true))
+            }
+            attrs = getAttributeByCategory.data.data
+            for (const attr of attrs) {
+                attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">${ attr.is_requried ? '*required' : '' }</span></label>`
+                if (Array.isArray(attr.options)) { //select option
+                    attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.id}" placeholder="${attr.label}" >`
+                    attributesHtml += `<option value="">------ None ------</option>`
+                    if (Array.isArray(attr.options)) {
+                        for (const opt of attr.options) {
+                            attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
+                        }
+                    }
+                    attributesHtml += `</select>`
+                } else { //text
+                    attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.id}">`
+                }
+                attributesHtml += '</div>'
+            }
+            break
+    }
+    areaProductAttributes.innerHTML = attributesHtml
+}
+function templateFormSku (number) {
+    return `
+        <div class="row p-3 child" style="margin: calc(-.35 * var(--bs-gutter-x)); margin-top: 8px;">
+            <div class="col-2">
+                <label for="">Sku</label>
+                <input type="text" class="form-control form-control-sm" placeholder="sku" name="skus[${number}][sku]" value="Sku child ${number + 1}" required>
+            </div>
+            <div class="col-2">
+                <label for="">quantity</label>
+                <input type="text" class="form-control form-control-sm" placeholder="qty" name="skus[${number}][quantity]" value="5" required>
+            </div>
+            <div class="col-2">
+                <label for="">Price</label>
+                <input type="text" class="form-control form-control-sm" placeholder="price" name="skus[${number}][price]" required value="30">
+            </div>
+             <div class="col-2">
+                <label for="">Weight</label>
+                <input type="text" class="form-control form-control-sm" placeholder="weight" name="skus[${number}][weight]" id="" required value="10">
+            </div>
+            <div class="col-3">
+                <label for="">Image</label>
+                <input type="file" class="form-control form-control-sm" placeholder="image" name="skus[${number}][image]" id="" onchange="uploadPicture(this)">
+                <img src="" class="preview-img mt-2 w-100">
+            </div>
+            <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this, 'sku')">-</button></div>
+            <div class="col-12 attrs mt-2">
+                <label for="">
+                    Attribues
+                    <small class="text-danger">Max 3 variant</small>
+                </label>
+                <div class="row">
+                    <div class="col-6">
+                        <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[${number}][sales_attributes][0][name]" id="" required value="Color">
+                    </div>
+                    <div class="col-5">
+                        <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[${number}][sales_attributes][0][value]" id="" required value="Black">
+                    </div>
+                    <div class="col-1">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addAttr(this)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `
+}
+function templateFormAttributeSKu (number1,number2) {
+    return `
+        <div class="row mt-2" >
+            <div class="col-6">
+                <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[${number1}][sales_attributes][${number2}][name]" value="Size">
+            </div>
+            <div class="col-5">
+                <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[${number1}][sales_attributes][${number2}][value]" Value="M">
+            </div>
+            <div class="col-1">
+                <button class="btn btn-danger btn-sm" onclick="removeItem(this, 'attr')">-</button>
+            </div>
+        </div>
+    `
+}
+function addAttr(el) {
+    const countAttr = el.closest('.attrs').querySelectorAll('.row').length
+    if (countAttr >= 3) {
+        return openPopup('Max 3 Variant', true)
+    }
+    const rootParent = document.querySelector('#form_skus_body')
+    const parent = el.closest('.child')
+    const paramsAll = Array.from(rootParent.querySelectorAll('.child'));
+    const indexParent = paramsAll.indexOf(parent);
+    el.closest('.attrs').insertAdjacentHTML('beforeend', templateFormAttributeSKu(indexParent, countAttr))
+}
 
+function validateForm() {
 
-
+}
 // ============= Event : Select shop ===================
 inputShop.addEventListener('change',async (e) => {
     const selectedOption = inputShop.options[inputShop.selectedIndex]
@@ -112,7 +262,7 @@ inputShop.addEventListener('change',async (e) => {
     openPopup('Loading Category...')
     areaProductAttributes.innerHTML = ''
     
-    await getCategories()
+    await renderCategories()
     
     // 
     const formStatus = document.querySelector('#form_status')
@@ -177,9 +327,6 @@ inputShop.addEventListener('change',async (e) => {
 })
 
 
-
-// ============= Event : Select Brand ====================
-
 // ============= Event : Set product variant ====================
 hasChildren.addEventListener('change', (e) => {
     if(e.target.checked === true) {
@@ -196,6 +343,21 @@ document.querySelector('#add_sku').addEventListener('click', (el) => {
     formSkusBody.insertAdjacentHTML('beforeend', templateFormSku(amountItem))
 })
 
+// ============= Event : Onload page ====================
+document.addEventListener('DOMContentLoaded',async function() {
+    for (const env of envs){
+        const opt = document.createElement('option');
+        opt.value = env.id
+        opt.innerHTML = env.name
+        inputEnv.appendChild(opt)
+    }
+})
+
+// ============= Evnet : click button submit ============
+document.querySelector('#submitForm').addEventListener('click', () => {
+    formCreate.dispatchEvent(new Event('submit', { cancelable: true }))
+})
+
 // ============= Event : Submit form ====================
 formCreate.addEventListener('submit', async (el) => {
     // Stop event sent data to server
@@ -203,13 +365,26 @@ formCreate.addEventListener('submit', async (el) => {
     // Reset dat
     logisticsSelect = []
 
+    // Validate before prepare form data
+    if (shopId == '') {
+        return openPopup('please select shop !', true)
+    }
+
 
     //  Read file name - value all in form & Prepare data format create product
     const setValue = (obj, path, value) => {
         const keys = path.replace(/\[(\w+)\]/g, '.$1').split('.')
         keys.reduce((o, key, i) => {
             if (i === keys.length - 1) o[key] = value
-            else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : {});
+            else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : [])
+            return o[key];
+        }, obj)
+    }
+    const setValue2 = (obj, path, value) => {
+        const keys = path.replace(/\[(\w+)\]/g, '.$1').split('.')
+        keys.reduce((o, key, i) => {
+            if (i === keys.length - 1) o[key] = value
+            else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : {})
             return o[key];
         }, obj)
     }
@@ -244,31 +419,40 @@ formCreate.addEventListener('submit', async (el) => {
             } else {
                 selectedOptions = value
             }
-            setValue(paramsCreate, key, selectedOptions)
+            setValue2(paramsCreate, key, selectedOptions)
         } else {
             setValue(paramsCreate, key, value)
         }
     }
-    // Validate 
-    if (shopId == '') {
-        return openPopup('please select shop !', true)
-    }
     
+    // Validat after prepare form data
     if (paramsCreate.category == '') {
         return openPopup('please select category !', true)
     }
-    if (document.querySelector('[name="image"]').files.length == 0) {
-        return openPopup('please select image !', true)
-    }
     
     const images = []
-    for (const elImage of selectImage) {
-        if (elImage?.files[0] == undefined) {
-            continue
+    const fDataImage = formDataImage.getAll('image[]')
+    if (action == 'create') {
+        for (const img of fDataImage) {
+            images.push(await encodeImageFileAsURL(img))
         }
-        images.push(await encodeImageFileAsURL(elImage.files[0]))
+    } else if (action == 'edit') {
+        for (const img of urlsImage) {
+            if (!img.match(/blob.*/)) {
+                images.push(img)
+            }
+        }
+        for (const img of fDataImage) {
+            if (typeof(img) != 'string') {
+                images.push(await encodeImageFileAsURL(img))
+            }
+        }
     }
-    paramsCreate.images = images.length > 0 ? images : []
+    if (images.length == 0) {
+        return openPopup('please select image !', true)
+    }
+    paramsCreate.images = images
+    
 
     // Set default form
     paramsCreate.is_cod = document.querySelector('[name="is_cod"]').checked
@@ -276,18 +460,18 @@ formCreate.addEventListener('submit', async (el) => {
     
     if (hasChildren.checked) {
         paramsCreate.skus = await Promise.all(
-        paramsCreate.skus
-            .filter(sku => typeof sku != null)
-            .map(async (sku) => {
-                // Assuming sku.image is a File object
-                if (sku.image.size == 0) {
-                    sku.image = ''
-                } else {
-                    sku.image = await encodeImageFileAsURL(sku.image)
-                }
-                sku.sales_attributes = sku.sales_attributes.filter(attr => typeof attr != null)
-                return sku
-            })
+            paramsCreate.skus
+                .filter(sku => typeof sku != null)
+                .map(async (sku) => {
+                    // Assuming sku.image is a File object
+                    if (sku.image.size == 0) {
+                        sku.image = ''
+                    } else {
+                        sku.image = await encodeImageFileAsURL(sku.image)
+                    }
+                    sku.sales_attributes = sku.sales_attributes.filter(attr => typeof attr != null)
+                    return sku
+                })
         )
         paramsCreate.type = 'config'
     } else {
@@ -322,29 +506,29 @@ formCreate.addEventListener('submit', async (el) => {
             // paramsCreate.attributes = Object.keys(paramsCreate.attributes).map(attr => {
             //     return {
             //         id: attr,
-            //         value: paramsCreate.attributes[attr]
+            //         value: paramsCreate.attributes[attr] || ''
             //     }
             // })
-            paramsCreate.attributes = []
             break
 
     }
-
-    let methodSent = {
-        endpoint: '',
-        method: ''
-    }
+    paramsCreate.attributes = []
+    let methodSent = {}
     if (action == 'create') {
+        methodSent.endpoint = '/api/v1/products/create',
         methodSent.method = 'post'
-        methodSent.endpoint = `/api/v1/products/create`
-    } else if (action == 'edit') {
-        methodSent.method = 'patch'
+        // openPopup('Send data to create product...')
+    } if (action == 'edit') {
         methodSent.endpoint = `/api/v1/products/edit/${productId}`
+        methodSent.method = 'patch'
+        // openPopup('Send data to update product...')
     }
-    console.log(paramsCreate)
+
+    //debug
+    document.querySelector('#bodyCreateProduct').innerHTML = `<pre>${JSON.stringify(paramsCreate, null, 2)}</pre>`
+
     return
-    //Sent to create product
-    openPopup('Send data to create product...')
+    //Sent to create/update product
     const responseCreateUpdateProduct = await requestData(methodSent.method, methodSent.endpoint, {}, paramsCreate)
     await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })
     await swal.close()
@@ -352,78 +536,4 @@ formCreate.addEventListener('submit', async (el) => {
     // Handle element
     document.querySelector('#respnseCreateProduct').innerHTML = `<pre>${JSON.stringify(responseCreateUpdateProduct, null, 2)}</pre>`
     document.querySelector('#bodyCreateProduct').innerHTML = `<pre>${JSON.stringify(paramsCreate, null, 2)}</pre>`
-})
-
-// ============= Event : Onload page ====================
-document.addEventListener('DOMContentLoaded',async function() {
-    
-
-    setValueForm()
-
-    for (const env of envs){
-        const opt = document.createElement('option');
-        opt.value = env.id
-        opt.innerHTML = env.name
-        inputEnv.appendChild(opt)
-    }
-
-    // User by page edit product
-    const urlParams = new URLSearchParams(window.location.search)
-    const queryEnvId = urlParams.get('env')
-    const queryShopId = urlParams.get('shop')
-    const queryProductId = urlParams.get('id')
-    const queryAction = urlParams.get('action')
-    document.querySelector('#title_page').textContent = 'Create product'
-    if (queryAction == 'edit') {
-        action = 'edit'
-        document.querySelector('#title_page').textContent = 'Update product'
-
-        if (queryEnvId) {
-            const findEnv = envs.find(env => env.id == queryEnvId)
-            omniCenterUrl = findEnv.url
-            omniCenterKey = findEnv.key
-            omniCenterSecret = findEnv.secret
-            authJwt = findEnv.auth_jwt
-            inputEnv.value = findEnv.id
-            inputEnv.setAttribute("disabled", "disabled")
-            
-            if (queryShopId) {
-                // Get shop
-                await getShops()
-                shopId = queryShopId
-                inputShop.value = queryShopId
-                inputShop.setAttribute("disabled", "disabled")
-                productId = queryProductId
-                const selectedOption = inputShop.options[inputShop.selectedIndex]
-                platformName = selectedOption.getAttribute('data-platform')
-
-                // // Category 
-                // await getCategories()
-
-                // // Get product detail
-                // let getProductDetail = await requestData('get', `/api/v1/products/${queryProductId}`)
-                // document.querySelector('#title_page').textContent = getProductDetail.name
-                // if (getProductDetail.status) {
-                //     getProductDetail = getProductDetail.data.data
-                //     inputProductName.value = getProductDetail.name
-                //     inputProductSku.value = getProductDetail.sku
-                //     inputDescription.value = getProductDetail.description
-                //     inputWidth.value = getProductDetail.width
-                //     inputHeight.value = getProductDetail.height
-                //     inputWeight.value = getProductDetail.weight
-                //     inputLength.value = getProductDetail.length
-                //     inputQuantity.value = getProductDetail.quantity
-                //     document.querySelector('.preview-img').src = getProductDetail.images[0]
-                //     if (getProductDetail.type == 'config') {
-                //         hasChildren.checked = true
-                //         document.querySelector('#form_skus').classList.remove('d-none')
-                //         for (const [index, sku] of getProductDetail.items.entries()) {
-                //             const amountItem = document.querySelectorAll('#form_skus_body .child').length
-                //             formSkusBody.insertAdjacentHTML('beforeend', templateFormSku(amountItem))
-                //         }
-                //     }
-                // }
-            }
-        }
-    }
 })

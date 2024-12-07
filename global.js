@@ -10,6 +10,7 @@ let omniCenterUrl = ''
 let omniCenterKey = ''
 let omniCenterSecret = ''
 let authJwt = ''
+let instanceCategoryCascaderMenu
 const inputEnv = document.querySelector('[id="env"]')
 const inputShop = document.querySelector('[id="shop"]')
 
@@ -21,15 +22,19 @@ let inputHeight = document.querySelector('[name="height"]')
 let inputWeight = document.querySelector('[name="weight"]')
 let inputLength = document.querySelector('[name="length"]')
 let inputQuantity = document.querySelector('[name="quantity"]')
-let inputSelectImage = document.querySelectorAll('.select-image')
+let dataProduct = {}
+let dataBrands = []
+let dataCategories = []
+let formDataImage = new FormData()
+const urlsImage = []
 const envs = [
     {
         id: 'LOCAL',
         name: 'Localhost',
-        url: 'http://127.0.0.1:4000',
+        url: 'http://192.168.1.56:4000',
         key: 'ab1049847e957ba4',
         secret: '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d',
-        auth_jwt: ''
+        auth_jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjUzMWVjM2IxYTcwODA5ZmU1YmVkZmMzIiwiaWF0IjoxNzMyNTAxMjY0LCJleHAiOjE3NjQwMzcyNjR9.iVAGiRfEOBKJUNszFMN0g9KHjz5wmgNF8Pgoju2O_aE'
     },
     {
         id: 'DEV',
@@ -101,11 +106,13 @@ async function axiosRequest(method, url, data, config = {}) {
         }
     })
 }
+
 async function requestData(method, endpoint, params = {}, data) {
     params.shop_id = shopId
     const auth = await authenticated(params)
     return axiosRequest(method, omniCenterUrl + endpoint + auth.queryString , data)
 }
+
 async function requestData2(method, endpoint, params = {}, data) {
     const uRLSearchParams = new URLSearchParams(params)
     return axiosRequest(method, omniCenterUrl + endpoint + `?${uRLSearchParams}`, data, {
@@ -114,6 +121,7 @@ async function requestData2(method, endpoint, params = {}, data) {
         }
     })
 }
+
 function openPopup(msg, showConfirmButton = false, allowOutsideClick = false) {
     Swal.fire({
         title: 'Info',
@@ -124,6 +132,7 @@ function openPopup(msg, showConfirmButton = false, allowOutsideClick = false) {
         allowEscapeKey: false
     })
 }
+
 function encodeImageFileAsURL(imageFile) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -136,6 +145,8 @@ function encodeImageFileAsURL(imageFile) {
         reader.readAsDataURL(imageFile);
     })
 }
+
+
 async function getShops() {
     const getShopAll = await requestData2('get', '/shops', {
         per_page: 100
@@ -175,15 +186,15 @@ async function getShops() {
         }
     }
 }
-async function getCategories() {
-    const getCategories = await requestData('get', '/api/v1/products/catgories')
-    if (getCategories.status == false || getCategories.data.code != 0) {
+async function renderCategories() {
+    dataCategories = await requestData('get', '/api/v1/products/catgories')
+    if (dataCategories.status == false || dataCategories.data.code != 0) {
         openPopup(JSON.stringify(getCategories,null,2), true)
-        return
+        return false
     }
-    let dataCates = getCategories.data.data
+    
+    dataCategories = dataCategories.data.data
     swal.close()
-    categoryCascaderMenu.val('Select category')
     categoryInput.value = ''
     function transformData(data) {
         const idMap = {}, result = [];
@@ -192,7 +203,7 @@ async function getCategories() {
             idMap[item.id] = node;
             if (item.parent_id === "0") result.push(node);
             else idMap[item.parent_id]?.s.push(node);
-        });
+        })
         return result;
     }
 
@@ -207,7 +218,7 @@ async function getCategories() {
             }
         })
     }
-    dataCates = transformData(dataCates)
+    let dataCates = transformData(dataCategories)
     dataCates.forEach(function(item) {
         item.label = item.name;
         item.value = item.indexcode;
@@ -215,12 +226,12 @@ async function getCategories() {
             item.children = item.s
             processItems(item.s)
         }
-    });
+    })
 
     brand.closest('tr').classList.remove('d-none')
 
     // ============= Event : Select Category ===================
-    const instanceCategoryCascaderMenu = categoryCascaderMenu.zdCascader({
+    instanceCategoryCascaderMenu = categoryCascaderMenu.zdCascader({
         data: [],
         container: '#category-cascader-menu',
         // search: true,
@@ -228,182 +239,30 @@ async function getCategories() {
             const categoryId = label.indexCode
             categoryInput.value = categoryId
             openPopup('Loading Brands...')
-            const getBrands = await requestData('get', '/api/v1/products/brands', {
-                category_id: categoryId
-            })
-
-            // Get Brand
-            brand.innerHTML = '<option value="">------ None ------</option>'
-            await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })
-            if (getBrands.status == true) {
-                swal.close()
-                for (const cate of getBrands.data.data){
-                    const opt = document.createElement('option');
-                    opt.value = cate.id
-                    opt.innerHTML = cate.name
-                    brand.appendChild(opt)
-                }
-            }
-
-            await renderAttributes(categoryId, getBrands)
+            
+            await getBrands(categoryId)
+            await renderAttributes(categoryId)
         }
     })
     instanceCategoryCascaderMenu.data().zdCascader.reload(dataCates)
 }
-async function renderAttributes(categoryId, getBrands) {
-    // Get Attribute
-    let attributesHtml = ''
-    let getAttributeByCategory
-    let attrs = []
-    switch (platformName) {
-        case 'Lazada': //lazada
-            getAttributeByCategory = await requestData('get', '/api/v1/products/attributes', {
-                category_id: categoryId
-            })
-            if (getAttributeByCategory.status == false) {
-                return openPopup(JSON.signature(getAttributeByCategory.data, true))
-            }
-            attrs = getAttributeByCategory.data.data.filter(attr => attr.is_requried)
-            for (const attr of attrs) {
-                attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">*required</span></label>`
-                switch (attr.input_type) {
-                    case 'text':
-                        attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}">`
-                        break
-                    case 'numeric':
-                        attributesHtml += `<input type="number" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}" value="30">`
-                        break
-                    case 'singleSelect':
-                        attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.name}" placeholder="${attr.label}">`
-                        attributesHtml += `<option value=""></option>`
-                        if (Array.isArray(attr.options)) {
-                            for (const opt of attr.options) {
-                                attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
-                            }
-                        }
-                        if (attr.name == 'brand') {
-                            for (const opt of getBrands.data.data) {
-                                attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
-                            }
-                        }
-                        attributesHtml += `</select>`
-                        break
-                    case 'enumInput':
-                        attributesHtml += `<div class="row m-0 p-2" style="max-height: 300px; overflow-y: scroll; border: 1px solid #8e8a8a; border-radius: 4px;">`
-                        for (const opt of attr.options) {
-                            attributesHtml += `<div class="form-check w-50">`
-                            attributesHtml += `<input class="form-check-input" type="radio" name="attributes.${attr.name}" id="${opt.id}">`
-                            attributesHtml += `<label class="form-check-label" for="">${opt.name}</label>`
-                            attributesHtml += `</div>`
-                        }
-                        attributesHtml += `</div>`
-                        break
-                    case 'multiEnumInput':
-                        attributesHtml += `<div class="row m-0 p-2" style="max-height: 300px; overflow-y: scroll; border: 1px solid #8e8a8a; border-radius: 4px;">`
-                        for (const opt of attr.options) {
-                            attributesHtml += `<div class="form-check w-50">`
-                            attributesHtml += `<input class="form-check-input" type="checkbox" name="attributes.${attr.name}" id="${opt.id}">`
-                            attributesHtml += `<label class="form-check-label" for="">${opt.name}</label>`
-                            attributesHtml += `</div>`
-                        }
-                        attributesHtml += `</div>`
-                        break
-                }
-                attributesHtml += '</div>'
-            }
-            break
-        case 'Tiktok Shop': //tiktok
-            getAttributeByCategory =await requestData('get', '/api/v1/products/attributes', {
-                category_id: categoryId
-            })
-            if (getAttributeByCategory.status == false) {
-                return openPopup(JSON.signature(getAttributeByCategory.data, true))
-            }
-            attrs = getAttributeByCategory.data.data
-            for (const attr of attrs) {
-                attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">${ attr.is_requried ? '*required' : '' }</span></label>`
-                if (Array.isArray(attr.options)) { //select option
-                    attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.id}" placeholder="${attr.label}" >`
-                    attributesHtml += `<option value="">------ None ------</option>`
-                    if (Array.isArray(attr.options)) {
-                        for (const opt of attr.options) {
-                            attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
-                        }
-                    }
-                    attributesHtml += `</select>`
-                } else { //text
-                    attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.id}">`
-                }
-                attributesHtml += '</div>'
-            }
-            break
-    }
-    areaProductAttributes.innerHTML = attributesHtml
-}
+async function getBrands (categoryId) {
+    dataBrands = await requestData('get', '/api/v1/products/brands', {
+        category_id: categoryId
+    })
 
-const templateFormSku = (number) => {
-    return `
-        <div class="row p-3 child" style="margin: calc(-.35 * var(--bs-gutter-x)); margin-top: 8px;">
-            <!--div class="col-3">
-                <label for="">name</label>
-                <input type="text" class="form-control form-control-sm" placeholder="name" name="skus[${number}][name]" required value="Product child ${number + 1}">
-            </div -->
-            <div class="col-2">
-                <label for="">Sku</label>
-                <input type="text" class="form-control form-control-sm" placeholder="sku" name="skus[${number}][sku]" value="Sku child ${number + 1}" required>
-            </div>
-            <div class="col-2">
-                <label for="">quantity</label>
-                <input type="text" class="form-control form-control-sm" placeholder="qty" name="skus[${number}][quantity]" value="5" required>
-            </div>
-            <div class="col-2">
-                <label for="">Price</label>
-                <input type="text" class="form-control form-control-sm" placeholder="price" name="skus[${number}][price]" required value="30">
-            </div>
-             <div class="col-2">
-                <label for="">Weight</label>
-                <input type="text" class="form-control form-control-sm" placeholder="weight" name="skus[${number}][weight]" id="" required value="10">
-            </div>
-            <div class="col-3">
-                <label for="">Image</label>
-                <input type="file" class="form-control form-control-sm" placeholder="image" name="skus[${number}][image]" id="" onchange="uploadPicture(this)">
-                <img src="" class="preview-img mt-2 w-100">
-            </div>
-            <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this, 'sku')">-</button></div>
-            <div class="col-12 attrs mt-2">
-                <label for="">
-                    Attribues
-                    <small class="text-danger">Max 3 variant</small>
-                </label>
-                <div class="row">
-                    <div class="col-6">
-                        <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[${number}][sales_attributes][0][name]" id="" required value="Color">
-                    </div>
-                    <div class="col-5">
-                        <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[${number}][sales_attributes][0][value]" id="" required value="Black">
-                    </div>
-                    <div class="col-1">
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="addAttr(this)">+</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `
-}
-const templateFormAttributeSKu = (number1,number2) => {
-    return `
-        <div class="row mt-2" >
-            <div class="col-6">
-                <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[${number1}][sales_attributes][${number2}][name]" value="Size">
-            </div>
-            <div class="col-5">
-                <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[${number1}][sales_attributes][${number2}][value]" Value="M">
-            </div>
-            <div class="col-1">
-                <button class="btn btn-danger btn-sm" onclick="removeItem(this, 'attr')">-</button>
-            </div>
-        </div>
-    `
+    // Get Brand
+    brand.innerHTML = '<option value="">------ None ------</option>'
+    await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })
+    if (dataBrands.status == true) {
+        swal.close()
+        for (const cate of dataBrands.data.data){
+            const opt = document.createElement('option');
+            opt.value = cate.id
+            opt.innerHTML = cate.name
+            brand.appendChild(opt)
+        }
+    }
 }
 
 function selectImage(el) {
@@ -414,18 +273,56 @@ function selectImage(el) {
 function formatDate(time) {
     return moment(time).format('DD/MM/YYYY HH:mm:ss')
 }
-
-inputSelectImage.forEach(el => {
-    el.addEventListener('change', () => {
-        if (el?.files[0] == undefined) {
-            return false
+function getCategoryPath(categoryId, categories, path = []) {
+    const category = categories.find(cate => cate.id === categoryId);
+    if (category) {
+        path.unshift(category.name)
+        if (category.parent_id) {
+            return getCategoryPath(category.parent_id, categories, path)
         }
-        const imageUrl = URL.createObjectURL(el.files[0])
-        const dataImageId = el.getAttribute('id')
-        const outputPreview = document.querySelector(`[data-image="${dataImageId}"]`)
-        outputPreview.style.backgroundImage = `url('${imageUrl}')`
-    })
-})
+    }
+    return path
+}
+function pathCategoryCascader(categoryId) {
+    const path = getCategoryPath(categoryId, dataCategories)
+    return path.join(" / ")
+}
+
+function renderPreviewImages () {
+    let html = ''
+    for (const [i, url] of urlsImage.entries()) {
+        html += `
+            <div class="inner item" in blobs">
+                <img src="${url}">
+                <button type="button" onclick="deletePreview(${i})"><span></span></button>
+            </div>
+        `
+    }
+    const boxPreviewImage = document.querySelector('.box-preview-image')
+    boxPreviewImage.querySelectorAll('.inner.item').forEach(e => e.remove())
+    boxPreviewImage.insertAdjacentHTML('afterbegin', html)
+}
+function previewImage(el) {
+    const files = el.target.files
+    let n = 0
+    for (const f of files) {
+        urlsImage.push(URL.createObjectURL(f))
+        formDataImage.append('image[]', files[n])
+        n++
+    }
+    console.log(formDataImage.getAll('image[]'))
+    renderPreviewImages()
+}
+function deletePreview(i) {
+    const images = formDataImage.getAll('image[]')
+    formDataImage.delete('image[]')
+    images
+        .filter((image, j) => j !== i)
+        .forEach(image => formDataImage.append('image[]', image))
+    urlsImage.splice(i, 1)
+    renderPreviewImages()
+}
+
 
 // ============= Event : Select Env ===================
 inputEnv.addEventListener('change',async (e) => {

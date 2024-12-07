@@ -73,7 +73,118 @@ label {
     background-color: #6a6c6c;
 }
 
-.box-image {
+/** Box upload image **/
+.box-preview-image {
+    display: grid;
+    grid-gap: 5px;
+    border: 1px solid #d4d4d4;
+    border-radius: 6px;
+    padding: 10px 5px 8px 5px;
+    position: relative;
+    overflow: hidden;
+    grid-template-columns: 1fr 1fr;
+}
+
+.box-preview-image .inner {
+    position: relative;
+    height: 170px;
+}
+.box-preview-image .inner.select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.box-preview-image .inner.select button {
+    background-color: #FFF;
+    border: 1px solid #ebebeb;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    padding: 0;
+    transition: .3s;
+    border-radius: 6px;
+    padding: 2rem;
+}
+.box-preview-image .inner.select button:hover {
+    background-color: #c4c4c4;
+}
+.box-preview-image .inner.select button:active {
+    box-shadow: inset 0 0 10px #a0a0a0;
+    border: 1px solid transparent;
+}
+.box-preview-image .inner.item button:focus, .box-preview-image .inner.select button:focus {
+    outline: 0;
+}
+.box-preview-image .inner.select button img {
+    width: 100%;
+}
+.box-preview-image .inner.item img,
+.box-preview-image .inner.item video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.box-preview-image .inner.item button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    border: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: rgba(253, 0, 0, .5);
+    cursor: pointer;
+}
+.box-preview-image .inner.item button:hover {
+    background-color: red;
+}
+.box-preview-image .inner.item button span {
+    display: block;
+    background-color: #fff;
+    width: 13px;
+    height: 3px;
+}
+.box-preview-image .inner.item .warning {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    opacity:0;
+    visibility: hidden;
+    top:0;
+    left:0
+}
+.box-preview-image .inner.item .warning span {
+    background: #f5b00dcf;
+    border-radius: 4px;
+    padding: 0 5px;
+    font-weight: 500;
+}
+.box-preview-image .inner.item.image-invalid .warning{
+    opacity:1!important;
+    visibility: visible!important;
+}
+[type="file"] {
+    display: none;
+}
+@media(min-width: 768px) {
+    .box-preview-image{
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+@media(min-width: 1024px){
+    .box-preview-image{
+        grid-template-columns: repeat(5, 1fr);
+    }
+    .box-preview-image .inner {
+        position: relative;
+        height: 150px;
+    }
+}
+
+/* .box-image {
     display: flex;
 }
 .box-image .item {
@@ -91,4 +202,4 @@ label {
 .box-image .item:hover{
     border: 2px solid #585859;
     transition: .3s;
-}
+} */
