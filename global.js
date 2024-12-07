@@ -189,7 +189,7 @@ async function getShops() {
 async function renderCategories() {
     dataCategories = await requestData('get', '/api/v1/products/catgories')
     if (dataCategories.status == false || dataCategories.data.code != 0) {
-        openPopup(JSON.stringify(getCategories,null,2), true)
+        openPopup(JSON.stringify(dataCategories,null, 2), true)
         return false
     }
     
@@ -310,7 +310,7 @@ function previewImage(el) {
         formDataImage.append('image[]', files[n])
         n++
     }
-    console.log(formDataImage.getAll('image[]'))
+    el.target.value = ''
     renderPreviewImages()
 }
 function deletePreview(i) {
