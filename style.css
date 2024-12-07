@@ -72,3 +72,23 @@ label {
 ::-webkit-scrollbar-thumb:hover {
     background-color: #6a6c6c;
 }
+
+.box-image {
+    display: flex;
+}
+.box-image .item {
+    width: 130px;
+    height: 130px;
+    border-radius: 10px;
+    border: 2px solid #ffffff00;
+    margin-left: 10px;
+    background-position: center center;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg');
+    background-size: 100%;
+    cursor: pointer;
+    transition: .3s;
+}
+.box-image .item:hover{
+    border: 2px solid #585859;
+    transition: .3s;
+}

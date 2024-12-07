@@ -4,10 +4,12 @@ let productId = ''
 let envId = ''
 let shopId = ''
 let shopName = ''
+let platformId = ''
 let platformName = ''
 let omniCenterUrl = ''
 let omniCenterKey = ''
 let omniCenterSecret = ''
+let authJwt = ''
 const inputEnv = document.querySelector('[id="env"]')
 const inputShop = document.querySelector('[id="shop"]')
 
@@ -19,7 +21,7 @@ let inputHeight = document.querySelector('[name="height"]')
 let inputWeight = document.querySelector('[name="weight"]')
 let inputLength = document.querySelector('[name="length"]')
 let inputQuantity = document.querySelector('[name="quantity"]')
-
+let inputSelectImage = document.querySelectorAll('.select-image')
 const envs = [
     {
         id: 'LOCAL',
@@ -27,6 +29,7 @@ const envs = [
         url: 'http://127.0.0.1:4000',
         key: 'ab1049847e957ba4',
         secret: '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d',
+        auth_jwt: ''
     },
     {
         id: 'DEV',
@@ -34,6 +37,7 @@ const envs = [
         url: 'https://dev-api.syncorder.co',
         key: '8619ebad17c092a4',
         secret: '8aa025e228952d353302a025f5f8935458d65ac3b293c384b4b4d1c89011bdde',
+        auth_jwt: ''
     },
     {
         id: 'UAT',
@@ -41,6 +45,15 @@ const envs = [
         url: 'https://uat-api.syncorder.co',
         key: '9ec1548eca4140b6',
         secret: '8489277fa5ae21de7fcb3928c6203e4ec031b25f6be6b58de108615f8d113c70',
+        auth_jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjNhYmU3NzYzNDg4OWFlNzA0M2JmYWQxIiwiaWF0IjoxNzMxMzc0Nzk1LCJleHAiOjE3NjI5MTA3OTV9.bI8DiFvHyfc6qljKg8TPXtfI_zgZMd982MUu7jIVgsc'
+    },
+    {
+        id: 'PROD',
+        name: 'Prod',
+        url: 'https://api.syncorder.co',
+        key: '4801f05834822df6',
+        secret: '658e549c25aad9bc2da9001d5dcfd2de3d055f0a9f2b98e7cbb9bf8220d6ab96',
+        auth_jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjNhZDAzYjQ1MjQ3MGY0NTI5N2I0ODJhIiwiaWF0IjoxNzE1OTM1NTY0LCJleHAiOjE3NDc0NzE1NjR9.SqIczjdoUSmr1ofti7A-IGyp7VoSauYrbnGN3GtdBQg'
     }
 ]
 
@@ -63,22 +76,19 @@ async function authenticated(object) {
         signature: signature
     }
 }
-async function requestData(method, endpoint, params = {}, data) {
-    let request
-    params.shop_id = shopId
-    const auth = await authenticated(params)
+async function axiosRequest(method, url, data, config = {}) {
     switch (method) {
         case 'get':
-            request = axios.get(omniCenterUrl + endpoint + auth.queryString)
+            request = axios.get(url, config)
             break
         case 'post':
-            request = axios.post(omniCenterUrl + endpoint + auth.queryString, data)
+            request = axios.post(url, data, config)
             break
         case 'patch':
-            request = axios.patch(omniCenterUrl + endpoint + auth.queryString, data)
+            request = axios.patch(url, data, config)
             break
     }
-    return await request.then(res => {
+    return request.then(res => {
         return {
             status: true,
             data: res.data
@@ -88,6 +98,19 @@ async function requestData(method, endpoint, params = {}, data) {
             status: false,
             error: err?.message,
             response: err?.response?.data
+        }
+    })
+}
+async function requestData(method, endpoint, params = {}, data) {
+    params.shop_id = shopId
+    const auth = await authenticated(params)
+    return axiosRequest(method, omniCenterUrl + endpoint + auth.queryString , data)
+}
+async function requestData2(method, endpoint, params = {}, data) {
+    const uRLSearchParams = new URLSearchParams(params)
+    return axiosRequest(method, omniCenterUrl + endpoint + `?${uRLSearchParams}`, data, {
+        headers: {
+            Authorization: 'Bearer ' + authJwt
         }
     })
 }
@@ -114,7 +137,9 @@ function encodeImageFileAsURL(imageFile) {
     })
 }
 async function getShops() {
-    const getShopAll = await requestData('get', '/api/v1/shop')
+    const getShopAll = await requestData2('get', '/shops', {
+        per_page: 100
+    })
     if (getShopAll.status) {
         swal.close()
         inputShop.innerHTML = '<option>------ None ------</option>'
@@ -144,6 +169,7 @@ async function getShops() {
             const opt = document.createElement('option');
             opt.value = shop.id
             opt.setAttribute('data-platform', platform)
+            opt.setAttribute('data-platform-id', shop.platform._id)
             opt.innerHTML = `${platform} - ${shopName}`
             inputShop.appendChild(opt)
         }
@@ -380,12 +406,34 @@ const templateFormAttributeSKu = (number1,number2) => {
     `
 }
 
+function selectImage(el) {
+    const inputId = el.getAttribute('data-image')
+    document.querySelector(`#${inputId}`).click()
+}
+
+function formatDate(time) {
+    return moment(time).format('DD/MM/YYYY HH:mm:ss')
+}
+
+inputSelectImage.forEach(el => {
+    el.addEventListener('change', () => {
+        if (el?.files[0] == undefined) {
+            return false
+        }
+        const imageUrl = URL.createObjectURL(el.files[0])
+        const dataImageId = el.getAttribute('id')
+        const outputPreview = document.querySelector(`[data-image="${dataImageId}"]`)
+        outputPreview.style.backgroundImage = `url('${imageUrl}')`
+    })
+})
+
 // ============= Event : Select Env ===================
 inputEnv.addEventListener('change',async (e) => {
     const findEnv = envs.find(env => env.id == e.target.value)
     omniCenterUrl = findEnv.url
     omniCenterKey = findEnv.key
     omniCenterSecret = findEnv.secret
+    authJwt = findEnv.auth_jwt
     openPopup(`Loadding shop of env ${findEnv.name}`)
     await getShops()
 })

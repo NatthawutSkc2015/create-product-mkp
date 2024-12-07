@@ -8,7 +8,8 @@ function renderTableProducts () {
         html += '<tr>'
             html += `
                 <td>
-                    <button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-parent','${product.id}')">
+                    <img src="${product.image}" class="w-100">
+                    <button class="mt-1 btn btn-outline-dark btn-sm" onclick="fullDetail('image-parent','${product.id}')">
                         <i class="bi bi-info-circle-fill"></i> 
                     </button>
                 </td>
@@ -36,66 +37,52 @@ function renderTableProducts () {
             html += `<td><div class="badge ${ product.type == 'simple' ? 'bg-primary' : 'bg-success' }" style="font-size:14px;">${ product.type }</div></td>`
             html += `
                 <td>
-                    <a href="create-update.html?env=${envId}&shop=${shopId}&id=${product.id}&action=edit" class="btn btn-secondary btn-sm"><i class="bi bi-pen"></i> Edit</a>
-                    <a href="" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</a>
+                    <a href="create-update.html?env=${envId}&shop=${shopId}&id=${product.id}&action=edit" class="btn btn-secondary btn-sm"><i class="bi bi-pen"></i></a>
+                    <a href="" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
                 </td>
             `
         html += '</tr>'
-        if (product.type == 'config') {
-            html += '<tr>'
-                html += '<td></td>'
-                html += '<td colspan="10" class="p-0">'
-                    html += '<div><b>Detail</b></div>'
+        html += '<tr>'
+            html += '<td></td>'
+            html += '<td colspan="10" class="p-0">'
+                html += '<div><b>Detail</b></div>'
                     html += `<table class="table table-bordered table-hover mt-2 detail">`
+                        html += '<thead>'
+                            html += '<tr>'
+                                html += '<th style="width:15%">Created</th>'
+                                html += '<th>ID</th>'
+                                html += '<th>Category</th>'
+                                html += '<th>Brand</th>'
+                                html += '<th>Weight</th>'
+                                html += '<th>Width</th>'
+                                html += '<th>Height</th>'
+                                html += '<th>Length</th>'
+                                html += '<th style="width:10%">Option logistic</th>'
+                                html += '<th style="width:10%">Open COD</th>'
+                            html += '<tr>'
+                        html += '</thead>'
                         html += '<tbody>'
                             html += '<tr>'
-                                html += '<th style="width: 10%;">Created</th>'
                                 html += `<td>${ product.created }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">ID</th>'
                                 html += `<td>${ product.mkp_id }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Category</th>'
                                 html += `<td>${ product.category }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Brand</th>'
                                 html += `<td>${ product.brand }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Weight</th>'
                                 html += `<td>${ product.weight }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Width</th>'
                                 html += `<td>${ product.width }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Height</th>'
                                 html += `<td>${ product.height }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Length</th>'
                                 html += `<td>${ product.length }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Option logistic</th>'
                                 html += `<td>${ product.option_logistic }</td>`
-                            html += '</tr>'
-                            html += '<tr>'
-                                html += '<th style="width: 10%;">Open COD</th>'
                                 html += `<td>${ product.open_cod }</td>`
                             html += '</tr>'
                         html += '</tbody>'
                     html += `</table>`
+                if (product.type == 'config') {
                     html += '<div><b>Product skus</b></div>'
                     html += '<table class="table table-bordered table-hover mt-2 skus">'
                         html += `
                             <thead>
                                 <th style="width: 5%;">ID</th>
-                                <th style="width: 8%;">Image</th>
+                                <th style="width: 5%;">Image</th>
                                 <th style="width: 30%;">Seller sku</th>
                                 <th>Attributes</th>
                                 <th style="width: 10%;">Price</th>
@@ -106,7 +93,11 @@ function renderTableProducts () {
                         for (const sku of product.skus) {
                             html += '<tr>'
                                 html += `<td>${sku.id}</td>`
-                                html += `<td><button class="btn btn-outline-dark btn-sm" onclick="fullDetail('image-childrent','${product.id}', '${sku.id}')">View </button></td>`
+                                html += `
+                                    <td>
+                                        <img src="${sku.image}" class="w-100">
+                                    </td>
+                                `
                                 html += `<td>${sku.sku || '-'}</td>`
                                 html += `<td>${sku.attrs}</td>`
                                 html += `<td>${sku.price}</td>`
@@ -115,9 +106,9 @@ function renderTableProducts () {
                         }
                         html += '</tbody>'
                     html += '</table>'
-                html += '</td>'
-            html += '</tr>'
-        }
+                }
+            html += '</td>'
+        html += '</tr>'
     }   
     return html
 }
@@ -130,11 +121,12 @@ function fullDetail(type, id, id2) {
     let html = '<div style="text-align:left; min-height: 500px; border: 1px solid #cfcbcb; border-radius: 10px; padding: 1rem;">'
     switch (platformName) {
         case 'Tiktok Shop':
+            const productTiktokShop = findProduct.tiktok_shop.info
             switch (type) {
                 case 'attributes':
                     title = `Attributes product : ${findProduct.name}`
-                    if (Array.isArray(findProduct.info.product_attributes)) {
-                        findProduct.info.product_attributes.forEach(attr => {
+                    if (Array.isArray(productTiktokShop.product_attributes)) {
+                        productTiktokShop.product_attributes.forEach(attr => {
                             html += `<div>${attr.name} : `
                             attr.values.forEach(val => {
                                 html += `${val.name}`
@@ -147,8 +139,8 @@ function fullDetail(type, id, id2) {
                 case 'image-parent':
                     title = `Images product : ${findProduct.name}`
                     html += '<div class="row">'
-                    if (Array.isArray(findProduct.info.images)) {
-                        findProduct.info.images.forEach(image => {
+                    if (Array.isArray(productTiktokShop.images)) {
+                        productTiktokShop.images.forEach(image => {
                             html += '<div class="col-3 mt-3">'
                             image.url_list.forEach((url, index) => {
                                 if (index == 0) {
@@ -160,28 +152,44 @@ function fullDetail(type, id, id2) {
                     }
                     html += '<div>'
                     break;
-                case 'image-childrent':
-                    let findSku = findProduct.info.skus.find(sku => sku.id == id2)
-                    title = `Image product : ${findProduct.name} - ${findSku.sales_attributes.map(attr => attr.value_name).join(',')}`
-                    html += '<div class="row">'
-                    findSku.sales_attributes.forEach((attr, index) => {
-                        if (index == 0) {
-                            html += '<div class="col-3 mt-3">'
-                            attr.sku_img.url_list.forEach((url, index) => {
-                                if (index == 0) {
-                                    html += `<img src="${url}" class="w-100" style="border: 1px solid #cfcbcb; border-radius: 6px;">`
-                                }
-                            })
-                            html += '</div>'
-                        }
-                    })
-                    html += '<div>'
-                    break;
             }
             break
         case 'Shopee':
+            const productShopee = findProduct.shopee.info
+            switch (type) {
+                case 'attributes':
+                    title = `Attributes product : ${findProduct.name}`
+                    break
+                case 'image-parent':
+                    title = `Images product : ${findProduct.name}`
+                    html += '<div class="row">'
+                        if (Array.isArray(productShopee.image.image_url_list)) {
+                            productShopee.image.image_url_list.forEach(image => {
+                                html += '<div class="col-3 mt-3">'
+                                    html += `<img src="${image}" class="w-100" style="border: 1px solid #cfcbcb; border-radius: 6px;">`
+                                html += '</div>'
+                            })
+                        }
+                    html += '<div>'
+                    break
+            }
             break
         case 'Lazada':
+            const productLazada = findProduct.lazada.info
+            switch (type) {
+                case 'image-parent':
+                    title = `Images product : ${findProduct.name}`
+                    html += '<div class="row">'
+                        if (Array.isArray(productLazada.images)) {
+                            productLazada.images.forEach(image => {
+                                html += '<div class="col-3 mt-3">'
+                                    html += `<img src="${image}" class="w-100" style="border: 1px solid #cfcbcb; border-radius: 6px;">`
+                                html += '</div>'
+                            })
+                        }
+                    html += '<div>'
+                    break
+            }
             break
         case 'Line Myshop':
             break
@@ -210,46 +218,74 @@ function productStatus(str) {
                 'PLATFORM_DEACTIVATED' : 'แพลตฟอร์มยกเลิกการใช้งาน',
                 'LIVE' : 'เปิดใช้งาน',
                 'DRAFT': 'ฉบับร่าง',
-                'DELETED': 'ผู้ขายลบ'
+                'DELETED': 'ผู้ขายลบ',
+            }[str]
+            break
+        case 'Shopee':
+            status = {
+                'NORMAL': 'เปิดใช้งาน',
+                'DELETED': 'ลบ',
+                'UNLIST': 'ปิด',
+                'BANNED': 'แบน',
+            }[str]
+            break
+        case 'Lazada':
+            status = {
+                'Active' : 'เปิดใช้งาน',
+                'InActive': 'ปิดใช้งาน',
+                'Pending QC': 'รอตรวจสอบ',
+                'Suspended': 'ถูกระงับ',
+                'Deleted': 'ลบ',
+            }[str]
+            break
+        case 'Line Myshop':
+            status = {
+                'sale': 'เปิดใช้งาน',
+                'hold': 'ปิดใช้งาน',
             }[str]
             break
     }
-    return status
+    return status || ''
 }
 async function loadData() {
     openPopup('Loading Products')
-    const getProducts = await requestData('get', '/api/v1/products',{
-        per_page: 100
+    const getProducts = await requestData2('get', '/products', {
+        per_page: 100,
+        shop: shopId,
+        platform: platformId,
     })
     if (getProducts.status) {
+        const productsMkp = getProducts.data.data.filter(p => p.platform.name == platformName).reverse()
         products = []
         switch (platformName) {
             case 'Tiktok Shop':
-                products = getProducts.data.data.map(product => {
-                    const findImageParent = product.info.images.find((_ ,index) => index == 0)
-                    product.mkp_id = product.info.product_id
-                    product.created = moment(product.info.create_time * 1000).format('DD/MM/YYYY HH:mm:ss')
+                products = productsMkp.map(product => {
+                    const productTiktok = product.tiktok_shop.info
+                    product.mkp_id = productTiktok.product_id
+                    product.created = formatDate(productTiktok.create_time * 1000)
                     product.quantity = '-'
                     product.price = '-'
                     product.attrs = ''
-                    product.category = product.info.category_list.map(cate => {
+                    product.category = productTiktok.category_list.map(cate => {
                         return cate.local_name
                     }).join(' > ')
                     product.brand = '-'
-                    product.weight = product.info.package_weight + ' km'
-                    product.width = product.info.package_height + ' cm'
-                    product.height = product.info.package_height + ' cm'
-                    product.length = product.info.package_length + ' cm'
+                    product.weight = productTiktok?.package_weight + ' km'
+                    product.width = productTiktok?.package_height + ' cm'
+                    product.height = productTiktok?.package_height + ' cm'
+                    product.length = productTiktok?.package_length + ' cm'
                     product.option_logistic = '-'
                     product.open_cod = ''
                     product.attrs = ''
-                    if (Array.isArray(product.info.product_attributes)) {
-                        product.attrs = product.info.product_attributes.map(attr => `<div>${attr.name} : ${ attr.values.map(v => v.name).join('') }</div>`).join('')
+                    product.description = productTiktok.description
+                    product.sku = ''
+                    product.image = productTiktok?.images[0]?.url_list[0] || noImage
+                    if (Array.isArray(productTiktok.product_attributes)) {
+                        product.attrs = productTiktok.product_attributes.map(attr => `<div>${attr.name} : ${ attr.values.map(v => v.name).join('') }</div>`).join('')
                     }
-                    product.image = findImageParent?.url_list?.find((_, index) => index == 0) || ''
-                    if (product.info.skus.length == 1) {
+                    if (productTiktok.skus.length == 1) {
                         product.type = 'simple'
-                        const findSku = product.info.skus.find((_, index) => index == 0)
+                        const findSku = productTiktok.skus.find((_, index) => index == 0)
                         product.price = findSku.price.original_price
                         product.sku = findSku.seller_sku
                         const findStockInfos = findSku.stock_infos.find((_, index) => index == 0)
@@ -257,30 +293,129 @@ async function loadData() {
                         if (findSku.sales_attributes.length > 0) {
                             product.type = 'config'
                         }
-                    } else if (product.info.skus.length > 1) {
+                    } else if (productTiktok.skus.length > 1) {
                         product.type = 'config'
                     }
-                    product.skus = product.info.skus.map((sku, index) => {
-                        const findStockInfos = sku.stock_infos.find((_, ii) => ii == index)
+                    product.skus = productTiktok.skus.map((sku, index) => {
                         let imageChild = ''
-                        sku.attrs = sku.sales_attributes.map((attr, ii) => {
-                            if (ii == index) {
-                                imageChild = attr?.sku_img?.url_list[0] || ''
-                            }
+                        const findStockInfos = sku.stock_infos.find((_, ii) => ii == index)
+                        sku.attrs = sku.sales_attributes.map((attr) => {
+                            imageChild = sku.sales_attributes[0]?.sku_img?.url_list[0] || ''
                             return `${attr.name} : ${attr.value_name}`
                         }).join(', ')
                         sku.price = sku.price.original_price
                         sku.quantity = findStockInfos?.available_stock || 0
                         sku.sku = sku.seller_sku
-                        sku.image = imageChild
+                        sku.image = imageChild || noImage
                         return sku
                     })
                     return product
-                }).reverse() //.filter(product => product.status == 'LIVE')
+                })
                 break
             case 'Shopee':
+                products = productsMkp.map(product => {
+                    const productShopee = product.shopee.info
+                    const priceInfo = productShopee?.price_info
+                    product.mkp_id = productShopee.item_id
+                    product.created = formatDate(moment(productShopee.create_time * 1000))
+                    product.skus = []
+                    product.price = Array.isArray(priceInfo) ? priceInfo[0].original_price : 0
+                    product.attrs = ''
+                    product.category = ''
+                    product.brand = productShopee.brand.original_brand_name
+                    product.weight = productShopee.weight + ' kg'
+                    product.width = productShopee.dimension.package_width + ' cm'
+                    product.height = productShopee.dimension.package_height + ' cm'
+                    product.length = productShopee.dimension.package_length + ' cm'
+                    product.option_logistic = ''
+                    product.open_cod = ''
+                    product.attrs = ''
+                    product.description = productShopee.description
+                    product.status = productShopee.item_status
+                    product.quantity = productShopee?.stock_info_v2 ? productShopee.stock_info_v2.seller_stock[0]?.stock || 0 : 0
+                    product.type = 'simple'
+                    product.image = productShopee?.image?.image_url_list[0] || noImage
+                    if (productShopee.has_model) { //config
+                        const tierVariation = product.shopee.model.tier_variation
+                        product.type = 'config'
+                        product.skus = product.shopee.model.model.map(sku => {
+                            let imageChild = ''
+                            const attrs = []
+                            if (sku.tier_index == undefined) {
+                                tierVariation.forEach((tier, index) => {
+                                    attrs.push(`${tier.name}: ${tier[index].option}`)
+                                })
+                            } else {
+                                sku.tier_index.forEach((tier, index) => {
+                                    if (tierVariation[index].option_list[tier].image) {
+                                        imageChild = tierVariation[index].option_list[tier].image.image_url
+                                    }
+                                    attrs.push(`${tierVariation[index].name}: ${tierVariation[index].option_list[tier].option}`)
+                                })
+                            }
+                            return {
+                                id: sku.model_id,
+                                sku: sku.model_sku,
+                                price: sku.price_info[0]?.original_price,
+                                quantity: sku.stock_info_v2?.summary_info?.total_available_stock || 0,
+                                attrs: attrs.join(','),
+                                image: imageChild || noImage
+                            }
+                        })
+                    }
+                    return product
+                })
                 break
             case 'Lazada':
+                products = productsMkp.map(product => {
+                    const productLazada = product.lazada.info
+                    product.mkp_id = productLazada.item_id
+                    product.created = formatDate(moment(Number(productLazada.created_time)))
+                    product.skus = []
+                    product.price = 0
+                    product.attrs = ''
+                    product.category = ''
+                    product.brand = ''
+                    product.weight = ''
+                    product.width = ''
+                    product.height = ''
+                    product.length = ''
+                    product.option_logistic = ''
+                    product.open_cod = ''
+                    product.attrs = ''
+                    product.description = ''
+                    product.status = productLazada.status
+                    product.quantity = 0
+                    product.type = 'simple'
+                    product.image = productLazada.images[0]
+                    if (productLazada.skus.length == 1) {
+                        const findSkuLazada = productLazada.skus.find((_, index) => index == 0)
+                        product.weight = findSkuLazada.package_weight + ' kg'
+                        product.width = findSkuLazada.package_width + ' cm'
+                        product.height = findSkuLazada.package_height + ' cm'
+                        product.length = findSkuLazada.package_width + ' cm'
+                        product.price = findSkuLazada.price
+                        product.quantity = findSkuLazada.quantity
+                    }
+                    if (productLazada.skus.length > 1) {
+                        product.type = 'config'
+                        product.skus = productLazada.skus.map(sku => {
+                            const attrs = Object.keys(sku.saleProp).map(key => {
+                                return `${key} : ${sku.saleProp[key]}`
+                            })
+                            const imageSku = sku?.Images || []
+                            return {
+                                id: sku.SkuId,
+                                sku: `${sku.SellerSku}`,
+                                price: sku.price + ' THB',
+                                quantity: sku.quantity,
+                                attrs: attrs.join(','),
+                                image: imageSku[0] || noImage
+                            }
+                        })
+                    }
+                    return product
+                }).filter(p => p.status == 'Active')
                 break
             case 'Line Myshop':
                 break
@@ -305,8 +440,8 @@ inputEnv.addEventListener('change',async (e) => {
 inputShop.addEventListener('change', async (e) => {
     shopId = e.target.value
     shopName = e.target.options[e.target.selectedIndex].text
-
     const selectedOption = inputShop.options[inputShop.selectedIndex]
+    platformId = selectedOption.getAttribute('data-platform-id')
     platformName = selectedOption.getAttribute('data-platform')
 
     await loadData()

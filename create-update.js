@@ -198,12 +198,11 @@ document.querySelector('#add_sku').addEventListener('click', (el) => {
 
 // ============= Event : Submit form ====================
 formCreate.addEventListener('submit', async (el) => {
-    console.log(action)
     // Stop event sent data to server
     el.preventDefault()
-
     // Reset dat
     logisticsSelect = []
+
 
     //  Read file name - value all in form & Prepare data format create product
     const setValue = (obj, path, value) => {
@@ -261,9 +260,15 @@ formCreate.addEventListener('submit', async (el) => {
     if (document.querySelector('[name="image"]').files.length == 0) {
         return openPopup('please select image !', true)
     }
-    if (document.querySelector('[name="image"]').files[0]) {
-        paramsCreate.image = await encodeImageFileAsURL(document.querySelector('[name="image"]').files[0])
+    
+    const images = []
+    for (const elImage of selectImage) {
+        if (elImage?.files[0] == undefined) {
+            continue
+        }
+        images.push(await encodeImageFileAsURL(elImage.files[0]))
     }
+    paramsCreate.images = images.length > 0 ? images : []
 
     // Set default form
     paramsCreate.is_cod = document.querySelector('[name="is_cod"]').checked
@@ -336,7 +341,8 @@ formCreate.addEventListener('submit', async (el) => {
         methodSent.method = 'patch'
         methodSent.endpoint = `/api/v1/products/edit/${productId}`
     }
-    
+    console.log(paramsCreate)
+    return
     //Sent to create product
     openPopup('Send data to create product...')
     const responseCreateUpdateProduct = await requestData(methodSent.method, methodSent.endpoint, {}, paramsCreate)
