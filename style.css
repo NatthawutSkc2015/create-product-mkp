@@ -166,7 +166,7 @@ label {
     opacity:1!important;
     visibility: visible!important;
 }
-[type="file"] {
+.box-preview-image [type="file"] {
     display: none;
 }
 @media(min-width: 768px) {

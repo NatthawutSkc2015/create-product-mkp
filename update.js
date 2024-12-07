@@ -29,8 +29,7 @@ document.addEventListener('DOMContentLoaded',async function() {
                 platformName = selectedOption.getAttribute('data-platform')
 
                 
-
-                // // Get product detail
+                // Get product detail
                 let getProductDetail = await requestData('get', `/api/v1/products/${queryProductId}`)
                 if (getProductDetail.status) {
                     getProductDetail = getProductDetail.data.data
@@ -44,13 +43,14 @@ document.addEventListener('DOMContentLoaded',async function() {
                     //Category 
                     await renderCategories()
 
+                    //Attribtes
                     await renderAttributes(categoryId)
 
+                    //Images
                     for (const img of getProductDetail.images) {
                         formDataImage.append('image[]', img)
                         urlsImage.push(img)
                     }
-                    
                     renderPreviewImages()
                     
                     // Set form
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded',async function() {
                             formSkusBody.insertAdjacentHTML('beforeend', templateFormSku(amountItem))
                             
                             const childContainer = formSkusBody.querySelector(`.child:nth-child(${index + 1})`)
-                            childContainer.querySelector(`.preview-img`).src = sku.images[0]
+                            childContainer.querySelector(`.preview-img`).src = sku.images[0] || noImage
                             childContainer.querySelector(`[name="skus[${index}][sku]"]`).value = sku.sku
                             childContainer.querySelector(`[name="skus[${index}][quantity]"]`).value = sku.quantity
                             childContainer.querySelector(`[name="skus[${index}][price]"]`).value = sku.price

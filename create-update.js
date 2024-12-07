@@ -198,7 +198,7 @@ function templateFormSku (number) {
             </div>
             <div class="col-3">
                 <label for="">Image</label>
-                <input type="file" class="form-control form-control-sm" placeholder="image" name="skus[${number}][image]" id="" onchange="uploadPicture(this)">
+                <input type="file" class="form-control form-control-sm" placeholder="image" name="skus[${number}][image]" id="" onchange="uploadImageChild(this)" accept="image/png, image/jpeg" >
                 <img src="" class="preview-img mt-2 w-100">
             </div>
             <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this, 'sku')">-</button></div>
@@ -517,17 +517,17 @@ formCreate.addEventListener('submit', async (el) => {
     if (action == 'create') {
         methodSent.endpoint = '/api/v1/products/create',
         methodSent.method = 'post'
-        // openPopup('Send data to create product...')
+        openPopup('Send data to create product...')
     } if (action == 'edit') {
         methodSent.endpoint = `/api/v1/products/edit/${productId}`
         methodSent.method = 'patch'
-        // openPopup('Send data to update product...')
+        openPopup('Send data to update product...')
     }
 
     //debug
-    document.querySelector('#bodyCreateProduct').innerHTML = `<pre>${JSON.stringify(paramsCreate, null, 2)}</pre>`
+    // document.querySelector('#bodyCreateProduct').innerHTML = `<pre>${JSON.stringify(paramsCreate, null, 2)}</pre>`
 
-    return
+    // return
     //Sent to create/update product
     const responseCreateUpdateProduct = await requestData(methodSent.method, methodSent.endpoint, {}, paramsCreate)
     await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })

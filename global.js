@@ -1,4 +1,5 @@
 // ============== Global Variable ==================
+const noImage = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
 let action = 'create'
 let productId = ''
 let envId = ''
@@ -266,8 +267,10 @@ async function getBrands (categoryId) {
 }
 
 function selectImage(el) {
-    const inputId = el.getAttribute('data-image')
-    document.querySelector(`#${inputId}`).click()
+    const [file] = el.files
+    if (file) {
+        el.closest('div').querySelector('.preview-img').src = URL.createObjectURL(file)
+    }
 }
 
 function formatDate(time) {
@@ -323,7 +326,12 @@ function deletePreview(i) {
     renderPreviewImages()
 }
 
-
+function uploadImageChild (el) {
+    const [file] = el.files
+    if (file) {
+        el.closest('div').querySelector('.preview-img').src = URL.createObjectURL(file)
+    }
+}
 // ============= Event : Select Env ===================
 inputEnv.addEventListener('change',async (e) => {
     const findEnv = envs.find(env => env.id == e.target.value)
