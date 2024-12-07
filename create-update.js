@@ -356,6 +356,8 @@ formCreate.addEventListener('submit', async (el) => {
 
 // ============= Event : Onload page ====================
 document.addEventListener('DOMContentLoaded',async function() {
+    
+
     setValueForm()
 
     for (const env of envs){
@@ -371,13 +373,17 @@ document.addEventListener('DOMContentLoaded',async function() {
     const queryShopId = urlParams.get('shop')
     const queryProductId = urlParams.get('id')
     const queryAction = urlParams.get('action')
+    document.querySelector('#title_page').textContent = 'Create product'
     if (queryAction == 'edit') {
         action = 'edit'
+        document.querySelector('#title_page').textContent = 'Update product'
+
         if (queryEnvId) {
             const findEnv = envs.find(env => env.id == queryEnvId)
             omniCenterUrl = findEnv.url
             omniCenterKey = findEnv.key
             omniCenterSecret = findEnv.secret
+            authJwt = findEnv.auth_jwt
             inputEnv.value = findEnv.id
             inputEnv.setAttribute("disabled", "disabled")
             
@@ -391,31 +397,32 @@ document.addEventListener('DOMContentLoaded',async function() {
                 const selectedOption = inputShop.options[inputShop.selectedIndex]
                 platformName = selectedOption.getAttribute('data-platform')
 
-                // Category 
-                await getCategories()
+                // // Category 
+                // await getCategories()
 
-                // Get product detail
-                let getProductDetail = await requestData('get', `/api/v1/products/${queryProductId}`)
-                if (getProductDetail.status) {
-                    getProductDetail = getProductDetail.data.data
-                    inputProductName.value = getProductDetail.name
-                    inputProductSku.value = getProductDetail.sku
-                    inputDescription.value = getProductDetail.description
-                    inputWidth.value = getProductDetail.width
-                    inputHeight.value = getProductDetail.height
-                    inputWeight.value = getProductDetail.weight
-                    inputLength.value = getProductDetail.length
-                    inputQuantity.value = getProductDetail.quantity
-                    document.querySelector('.preview-img').src = getProductDetail.images[0]
-                    if (getProductDetail.type == 'config') {
-                        hasChildren.checked = true
-                        document.querySelector('#form_skus').classList.remove('d-none')
-                        for (const [index, sku] of getProductDetail.items.entries()) {
-                            const amountItem = document.querySelectorAll('#form_skus_body .child').length
-                            formSkusBody.insertAdjacentHTML('beforeend', templateFormSku(amountItem))
-                        }
-                    }
-                }
+                // // Get product detail
+                // let getProductDetail = await requestData('get', `/api/v1/products/${queryProductId}`)
+                // document.querySelector('#title_page').textContent = getProductDetail.name
+                // if (getProductDetail.status) {
+                //     getProductDetail = getProductDetail.data.data
+                //     inputProductName.value = getProductDetail.name
+                //     inputProductSku.value = getProductDetail.sku
+                //     inputDescription.value = getProductDetail.description
+                //     inputWidth.value = getProductDetail.width
+                //     inputHeight.value = getProductDetail.height
+                //     inputWeight.value = getProductDetail.weight
+                //     inputLength.value = getProductDetail.length
+                //     inputQuantity.value = getProductDetail.quantity
+                //     document.querySelector('.preview-img').src = getProductDetail.images[0]
+                //     if (getProductDetail.type == 'config') {
+                //         hasChildren.checked = true
+                //         document.querySelector('#form_skus').classList.remove('d-none')
+                //         for (const [index, sku] of getProductDetail.items.entries()) {
+                //             const amountItem = document.querySelectorAll('#form_skus_body .child').length
+                //             formSkusBody.insertAdjacentHTML('beforeend', templateFormSku(amountItem))
+                //         }
+                //     }
+                // }
             }
         }
     }

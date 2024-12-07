@@ -37,7 +37,7 @@ function renderTableProducts () {
             html += `<td><div class="badge ${ product.type == 'simple' ? 'bg-primary' : 'bg-success' }" style="font-size:14px;">${ product.type }</div></td>`
             html += `
                 <td>
-                    <a href="create-update.html?env=${envId}&shop=${shopId}&id=${product.id}&action=edit" class="btn btn-secondary btn-sm"><i class="bi bi-pen"></i></a>
+                    <a href="create-update.html?env=${envId}&shop=${shopId}&id=${product.id}&action=edit" target="_blank" class="btn btn-secondary btn-sm"><i class="bi bi-pen"></i></a>
                     <a href="" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
                 </td>
             `
