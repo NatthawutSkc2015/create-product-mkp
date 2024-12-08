@@ -184,6 +184,7 @@ function templateFormSku (number) {
             <div class="col-2">
                 <label for="">Sku</label>
                 <input type="text" class="form-control form-control-sm" placeholder="sku" name="skus[${number}][sku]" value="Sku child ${number + 1}" required>
+                <input type="hidden" name="skus[${number}][id]">
             </div>
             <div class="col-2">
                 <label for="">quantity</label>
