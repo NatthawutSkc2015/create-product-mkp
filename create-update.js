@@ -254,6 +254,32 @@ function addAttr(el) {
     el.closest('.attrs').insertAdjacentHTML('beforeend', templateFormAttributeSKu(indexParent, countAttr))
 }
 
+async function getLogistics() {
+    const getLogistics = await requestData('get', '/api/v1/products/logistics')
+    inputLogistic.innerHTML = ''
+    if (getLogistics.status == true) {
+        for (const obj of getLogistics.data.data) {
+            const opt = document.createElement('option');
+            opt.value = obj.id
+            opt.innerHTML = obj.name
+            inputLogistic.appendChild(opt)
+        }
+        logisticsList = getLogistics.data.data
+    }
+    formLogistics.classList.remove('d-none')
+}
+
+async function getStatus() {
+    formStatus.classList.remove('d-none')
+    formFormOpenCod.classList.remove('d-none')
+    for (const obj of statusesProduct.shopee) {
+        const opt = document.createElement('option');
+        opt.value = obj.value
+        opt.innerHTML = obj.text
+        inputStatus.appendChild(opt)
+    }
+}
+
 function validateForm() {
 
 }
@@ -269,7 +295,7 @@ inputShop.addEventListener('change',async (e) => {
     
     await renderCategories()
     
-    // 
+    //
     inputStatus.innerHTML = '<option value="">------ None ------</option>'
     formStatus.classList.add('d-none')
     formFormOpenCod.classList.add('d-none')
@@ -284,28 +310,9 @@ inputShop.addEventListener('change',async (e) => {
     
     switch (platformName) {
         case 'Shopee': //shopee
-            formStatus.classList.remove('d-none')
-            formFormOpenCod.classList.remove('d-none')
-            for (const obj of statusesProduct.shopee) {
-                const opt = document.createElement('option');
-                opt.value = obj.value
-                opt.innerHTML = obj.text
-                inputStatus.appendChild(opt)
-            }
-
+            await getStatus()
+            await getLogistics()
             
-            const getLogistics = await requestData('get', '/api/v1/products/logistics')
-            inputLogistic.innerHTML = ''
-            if (getLogistics.status == true) {
-                for (const obj of getLogistics.data.data) {
-                    const opt = document.createElement('option');
-                    opt.value = obj.id
-                    opt.innerHTML = obj.name
-                    inputLogistic.appendChild(opt)
-                }
-                logisticsList = getLogistics.data.data
-            }
-            formLogistics.classList.remove('d-none')
             break
         case 'Tiktok Shop': //tiktok
             break

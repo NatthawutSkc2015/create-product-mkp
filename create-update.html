@@ -126,7 +126,10 @@
                                 </td>
                             </tr>
                             <tr id="form_skus" class="d-none">
-                                <td><label for="">Skus</label> <small class="text-danger">*Required</small></td>
+                                <td><label for="">
+                                    Skus</label> <small class="text-danger">*Required</small>
+                                    <button type="button" class="btn btn-primary btn-sm" id="add_sku">+</button>
+                                </td>
                                 <td id="form_skus_body">
                                     <div class="row p-3 child" style="margin: calc(-.35 * var(--bs-gutter-x));">
                                         <div class="col-2">
@@ -150,7 +153,9 @@
                                             <input type="file" class="form-control form-control-sm upload-image" placeholder="image" name="skus[0][image]" onchange="selectImage(this)">
                                             <img src="" class="preview-img mt-2 w-100">
                                         </div>
-                                        <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-primary btn-sm" id="add_sku">+</button></div>
+                                        <div class="col-1 ml-auto text-right">
+                                           
+                                        </div>
                                         
                                         <div class="col-12 attrs mt-2">
                                             <label for="">

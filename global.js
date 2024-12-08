@@ -190,6 +190,8 @@ async function getShops() {
         }
     }
 }
+
+
 async function renderCategories() {
     dataCategories = await requestData('get', '/api/v1/products/catgories')
     if (dataCategories.status == false || dataCategories.data.code != 0) {

@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded',async function() {
                 const selectedOption = inputShop.options[inputShop.selectedIndex]
                 platformName = selectedOption.getAttribute('data-platform')
 
-                
                 // Get product detail
                 let getProductDetail = await requestData('get', `/api/v1/products/${queryProductId}`)
                 if (getProductDetail.status) {
@@ -54,6 +53,23 @@ document.addEventListener('DOMContentLoaded',async function() {
                     }
                     renderPreviewImages()
                     
+                    // Split data to platform
+                    switch (platformName) {
+                        case 'Tiktok Shop':
+                            break
+                        case 'Shopee':
+                            await getStatus()
+                            await getLogistics()
+
+                            $("#logistics").val(getProductDetail.logistics.map(l => String(l.logistic_id)))
+                            productSizeByCarier(inputLogistic)
+                            for (const logistic of getProductDetail.logistics) {
+                                document.querySelector(`[data-carier-id="${logistic.logistic_id}"]`).value = logistic.size_id
+                            }
+                            formFormOpenCod.querySelector('[name="is_cod"]').checked = getProductDetail.is_cod_open
+                            break
+                    }
+
                     // Set form
                     categoryInput.value = categoryId
                     instanceCategoryCascaderMenu.val(pathCategoryCascader(categoryId))
@@ -65,6 +81,8 @@ document.addEventListener('DOMContentLoaded',async function() {
                     inputWeight.value = getProductDetail.weight
                     inputLength.value = getProductDetail.length
                     inputQuantity.value = getProductDetail.quantity
+                    inputStatus.value = getProductDetail.status
+                    
 
                     // Image preview
                     document.querySelectorAll('.box-image .item').forEach((el, i) => {
