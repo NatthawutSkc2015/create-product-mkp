@@ -38,6 +38,7 @@ const formLogistics = document.querySelector('#form_logistics')
 const categoryCascaderMenu = $('#category-cascader-menu')
 const categoryInput = document.querySelector('[name="category"]')
 const inputLogistic = document.querySelector('[id="logistics"]')
+const inputStatus = document.querySelector('[name="status"]')
 const formCateCascader = document.querySelector('#form_cate_cascader')
 const areaProductAttributes = document.querySelector('#area_product_attributes')
 const formHeight = document.querySelector('#form_height')
@@ -46,6 +47,8 @@ const formWidth = document.querySelector('#form_width')
 const formWeight = document.querySelector('#form_weight')
 const formPrice = document.querySelector('#form_price')
 const formBrand = document.querySelector('#form_brand')
+const formStatus = document.querySelector('#form_status')
+const formFormOpenCod = document.querySelector('#form_open_cod')
 
 function removeItem(el, action) {
     el.closest('.row').remove()
@@ -267,9 +270,6 @@ inputShop.addEventListener('change',async (e) => {
     await renderCategories()
     
     // 
-    const formStatus = document.querySelector('#form_status')
-    const formFormOpenCod = document.querySelector('#form_open_cod')
-    const inputStatus = document.querySelector('[name="status"]')
     inputStatus.innerHTML = '<option value="">------ None ------</option>'
     formStatus.classList.add('d-none')
     formFormOpenCod.classList.add('d-none')
@@ -518,6 +518,9 @@ formCreate.addEventListener('submit', async (el) => {
             //     }
             // })
             paramsCreate.attributes = []
+            break
+        case 'Line MyShop':
+            
             break
 
     }

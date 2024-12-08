@@ -75,6 +75,19 @@ document.addEventListener('DOMContentLoaded',async function() {
                         })
                     })
 
+                    switch (platformName) {
+                        case 'Line Myshop':
+                            formStatus.classList.remove('d-none')
+                            for (const obj of statusesProduct.line_myshop) {
+                                const opt = document.createElement('option');
+                                opt.value = obj.value
+                                opt.innerHTML = obj.text
+                                inputStatus.appendChild(opt)
+                            }
+                            inputStatus.value = getProductDetail.status ? 'onsale' : 'hide'
+                            break
+                    }
+
                     // Set skus
                     if (getProductDetail.type == 'config') {
                         hasChildren.checked = true

@@ -254,6 +254,7 @@ async function loadData() {
         platform: platformId,
     })
     if (getProducts.status) {
+        // console.log( getProducts.data.data.map(p => p.platform.name))
         const productsMkp = getProducts.data.data.filter(p => p.platform.name == platformName).reverse()
         products = []
         switch (platformName) {
@@ -417,6 +418,45 @@ async function loadData() {
                 }).filter(p => p.status == 'Active')
                 break
             case 'Line Myshop':
+                products = productsMkp.map(product => {
+                    const productLineMyshop = product.line_myshop.info
+                    product.mkp_id = productLineMyshop.id
+                    product.created = ''
+                    product.skus = []
+                    product.price = 0
+                    product.attrs = ''
+                    product.category = ''
+                    product.brand = ''
+                    product.weight = ''
+                    product.width = ''
+                    product.height = ''
+                    product.length = ''
+                    product.option_logistic = ''
+                    product.open_cod = ''
+                    product.attrs = ''
+                    product.description = ''
+                    product.status = productLineMyshop.status
+                    product.quantity = 0
+                    product.type = 'simple'
+                    if (productLineMyshop.hasOnlyDefaultVariant) {
+                        product.type = 'config'
+                    }
+                    if (productLineMyshop.hasOnlyDefaultVariant == false) {
+                        product.type = 'config'
+                        product.skus = productLineMyshop.variants.map(sku => {
+                            return {
+                                id: sku.id,
+                                sku: sku.sku || '',
+                                price: sku.price + ' THB',
+                                quantity: sku.onHandNumber,
+                                attrs: [],
+                                image: sku.imageUrl || noImage
+                            }
+                        })
+                    }
+                    return product
+                })
+                console.log(products)
                 break
         }
         swal.close()
