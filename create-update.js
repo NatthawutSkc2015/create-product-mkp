@@ -45,6 +45,7 @@ const formLength = document.querySelector('#form_length')
 const formWidth = document.querySelector('#form_width')
 const formWeight = document.querySelector('#form_weight')
 const formPrice = document.querySelector('#form_price')
+const formBrand = document.querySelector('#form_brand')
 
 function removeItem(el, action) {
     el.closest('.row').remove()
@@ -278,6 +279,7 @@ inputShop.addEventListener('change',async (e) => {
     formWidth.classList.remove('d-none')
     formWeight.classList.remove('d-none')
     formPrice.classList.remove('d-none')
+    formBrand.classList.remove('d-none')
     
     switch (platformName) {
         case 'Shopee': //shopee
@@ -321,6 +323,7 @@ inputShop.addEventListener('change',async (e) => {
             formWidth.classList.add('d-none')
             formWeight.classList.add('d-none')
             formPrice.classList.add('d-none')
+            formBrand.classList.add('d-none')
             break;
     }
     setValueForm()
@@ -362,8 +365,10 @@ document.querySelector('#submitForm').addEventListener('click', () => {
 formCreate.addEventListener('submit', async (el) => {
     // Stop event sent data to server
     el.preventDefault()
-    // Reset dat
-    logisticsSelect = []
+
+    if (envId == '') {
+        return openPopup('please select env !', true)
+    }
 
     // Validate before prepare form data
     if (shopId == '') {
@@ -509,10 +514,10 @@ formCreate.addEventListener('submit', async (el) => {
             //         value: paramsCreate.attributes[attr] || ''
             //     }
             // })
+            paramsCreate.attributes = []
             break
 
     }
-    paramsCreate.attributes = []
     let methodSent = {}
     if (action == 'create') {
         methodSent.endpoint = '/api/v1/products/create',

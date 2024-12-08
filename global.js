@@ -335,6 +335,7 @@ function uploadImageChild (el) {
 // ============= Event : Select Env ===================
 inputEnv.addEventListener('change',async (e) => {
     const findEnv = envs.find(env => env.id == e.target.value)
+    envId = findEnv.id
     omniCenterUrl = findEnv.url
     omniCenterKey = findEnv.key
     omniCenterSecret = findEnv.secret

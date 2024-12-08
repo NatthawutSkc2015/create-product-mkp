@@ -184,6 +184,12 @@ label {
     }
 }
 
+@media(min-width: 1366px){
+    .box-preview-image{
+        grid-template-columns: repeat(7, 1fr);
+    }
+}
+
 /* .box-image {
     display: flex;
 }
