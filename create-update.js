@@ -487,26 +487,28 @@ formCreate.addEventListener('submit', async (el) => {
 
     switch (platformName) {
         case 'Shopee': //shopee
-            if (logisticsSelect.length == 0) {
-                openPopup('please select logistic !', true)
-                return
-            }
-            const logistics = []
-            const selectProductSizeByCarier = document.querySelectorAll('.logistic-product-size')
-            for (const selectProductSize of selectProductSizeByCarier) {
-                const dataCarierId = selectProductSize.getAttribute('data-carier-id')
-                const logistic = logisticsSelect.find(logistic => logistic.id == dataCarierId)
-                if (logistic) {
-                    logistics.push({
-                        // shipping_fee: '',
-                        // is_free: '',
-                        size_id: selectProductSize.value,
-                        enabled: true,
-                        logistic_id: logistic.id,
-                    })
+            if (action == 'create') {
+                if (logisticsSelect.length == 0) {
+                    openPopup('please select logistic !', true)
+                    return
                 }
+                const logistics = []
+                const selectProductSizeByCarier = document.querySelectorAll('.logistic-product-size')
+                for (const selectProductSize of selectProductSizeByCarier) {
+                    const dataCarierId = selectProductSize.getAttribute('data-carier-id')
+                    const logistic = logisticsSelect.find(logistic => logistic.id == dataCarierId)
+                    if (logistic) {
+                        logistics.push({
+                            // shipping_fee: '',
+                            // is_free: '',
+                            size_id: selectProductSize.value,
+                            enabled: true,
+                            logistic_id: logistic.id,
+                        })
+                    }
+                }
+                paramsCreate.logistics = logistics
             }
-            paramsCreate.logistics = logistics
             break
         case 'Tiktok Shop':
             // paramsCreate.attributes = Object.keys(paramsCreate.attributes).map(attr => {
@@ -525,8 +527,8 @@ formCreate.addEventListener('submit', async (el) => {
         methodSent.method = 'post'
         openPopup('Send data to create product...')
     } if (action == 'edit') {
-        methodSent.endpoint = `/api/v1/products/edit/${productId}`
-        methodSent.method = 'patch'
+        methodSent.endpoint = `/api/v1/products/${productId}/edit`
+        methodSent.method = 'put'
         openPopup('Send data to update product...')
     }
 

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded',async function() {
         action = 'edit'
         if (queryEnvId) {
             const findEnv = envs.find(env => env.id == queryEnvId)
+            envId = findEnv.id
             omniCenterUrl = findEnv.url
             omniCenterKey = findEnv.key
             omniCenterSecret = findEnv.secret
@@ -85,6 +86,7 @@ document.addEventListener('DOMContentLoaded',async function() {
                             
                             const childContainer = formSkusBody.querySelector(`.child:nth-child(${index + 1})`)
                             childContainer.querySelector(`.preview-img`).src = sku.images[0] || noImage
+                            childContainer.querySelector(`[name="skus[${index}][id]"]`).value = sku.model_id
                             childContainer.querySelector(`[name="skus[${index}][sku]"]`).value = sku.sku
                             childContainer.querySelector(`[name="skus[${index}][quantity]"]`).value = sku.quantity
                             childContainer.querySelector(`[name="skus[${index}][price]"]`).value = sku.price

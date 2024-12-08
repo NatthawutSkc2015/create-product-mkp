@@ -93,6 +93,9 @@ async function axiosRequest(method, url, data, config = {}) {
         case 'patch':
             request = axios.patch(url, data, config)
             break
+        case 'put':
+            request = axios.put(url, data, config)
+            break
     }
     return request.then(res => {
         return {
