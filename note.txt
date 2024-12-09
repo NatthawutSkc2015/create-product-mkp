@@ -1,0 +1,252 @@
+Scenaori 1: เคสมีโครงสร้างไว้แล้ว 1 ระดับ จะ update ระดับเดียวกัน
+
+//data response
+{
+    {
+        "model_id": "10000",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "red"
+            }
+        ]        
+    },
+    {
+        "model_id": "20000",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "blue"
+            }
+        ]
+    }
+}
+
+// shopee data
+//1 . จะเพิ่ม black เป็น option ใหม่ ให้ใช้ sturcture นี้ยิ่งไปที่ v2.product.update_tier_variation 
+ใช้ condition นี้กรองเอา model เดิม
+data.model_list.filter(model => model_id != 0)
+{
+    "item_id": 800250275,
+    "tier_variation": [
+        {
+            "name": "Color",
+            "option_list": [
+                { "option": "red" },
+                { "option": "black" }, 
+                { "option": "blue" }
+            ]
+        }
+    ],
+    "model_list": [ //ข้อมูล model เก่า
+        {
+            "tier_index": [0],
+            "model_id": 10000
+        },
+        {
+            "tier_index": [2],
+            "model_id": 20000
+        }
+    ]
+}
+
+//2 ยิงเพิ่ม model  => v2.product.add_model
+ใช้ condition กรองเอา model ใหม่
+data.model_list.filter(model => model_id == 0).map(m => {
+    delete m.model_id
+})
+{
+    "item_id": 800250275,
+    "model_list": [
+        {
+            "tier_index": [1], //เลือกสีดำ
+            "original_price": 30,
+            "model_sku": "sku-black",
+            "seller_stock": [
+                {
+                    "stock": 300
+                }
+            ]
+        }
+    ]
+}
+
+Scenaori 2: เคสมีโครงสร้างไว้แล้ว 1 ระดับ จะทำเป็น 2 ระดับ
+
+{
+    {
+        "model_id": "10000", //id จะถูก shopee แล้วสร้างใหม่
+        "sku": "Red L"
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "red"
+            }
+            // ส่วนที่จะเพิ่มใหม่
+            {
+                "name": "Size",
+                "value": "L"
+            }
+        ]        
+    },
+    {
+        "model_id": "20000", //id จะถูก shopee แล้วสร้างใหม่
+        "sku": "Blue L"
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "blue"
+            },
+            //ส่วนที่จะเพิ่มใหม่
+            {
+                "name": "Size",
+                "value": "L"
+            }
+        ]
+    },
+
+    //ส่วนที่จะเพิ่มใหม่
+    {
+        "model_id": "",
+        "sku": "Red XL",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "Red"
+            },
+            {
+                "name": "Size",
+                "value": "XL"
+            }
+        ]
+    },
+    {
+        "model_id": "",
+        "sku": "Blue Xl",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "Blue"
+            },
+            {
+                "name": "Size",
+                "value": "XL"
+            }
+        ]
+    }
+}
+
+condition เช็คว่า จำนวน model ที่ mongodb != จำนวน sku
+ใช้ข้อมูลนี้ยิ่งไปสร้าง structure ใหม่ product.init_tier_variation (ยิ่งสร้างใหม่)
+{
+  "item_id": 100918691,
+  "tier_variation": [
+    {
+      "option_list": [
+        { "option": "red", "image": { "image_id": "ถ้ามี ไปดึงข้อมูล id ภาพของข้อมูลเดิมมา ไม่ให้รูปหาย" } },
+        { "option": "blue", "image": { "image_id": "ถ้ามี ไม่ดึงข้อมูล id ภาพของข้อมูลเดิมมา ไม่ให้รูปหาย" } }
+      ],
+      "name": "color"
+    },
+    {
+      "option_list": [
+        { "option": "L" },
+        { "option": "XL" }
+      ],
+      "name": "size"
+    }
+  ],
+  "model": [
+    {
+      "original_price": 10,
+      "model_sku": "Red L",
+      "normal_stock": 100,
+      "tier_index": [ 0, 0 ]
+    },
+    {
+      "original_price": 20,
+      "model_sku": "Red XL",
+      "normal_stock": 200,
+      "tier_index": [ 0, 1 ]
+    },
+    {
+      "original_price": 30,
+      "model_sku": "Blue L",
+      "normal_stock": 300,
+      "tier_index": [ 1, 0 ]
+    },
+    {
+      "original_price": 40,
+      "model_sku": "Blue XL",
+      "normal_stock": 400,
+      "tier_index": [ 1, 1 ]
+    }
+  ]
+}
+
+
+Scenaori 3: เคสมีโครงสร้างไว้แล้ว ระดับเดียวกัน
+
+{
+    {
+        "model_id": "10000",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "red"
+            }
+        ]        
+    },
+    //ลบออก
+    {
+        "model_id": "20000",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "Blue"
+            }
+        ]
+    },
+    {
+        "model_id": "30000",
+        "sales_attributes": [
+            {
+                "name": "Color",
+                "value": "Black"
+            }
+        ]
+    }
+}
+
+
+ใช้ข้อมูลนี้ยิง update api v2.product.update_tier_variation
+{
+    "item_id": 800250275,
+    "tier_variation": [
+        {
+            "name": "Color",
+            "option_list": [
+                { "option": "red" },
+                { "option": "blue" }, //ลบออก
+                { "option": "black" }
+            ]
+        }
+    ],
+    "model_list": [ //ข้อมูล model เก่า
+        {
+            "tier_index": [0],
+            "model_id": 10000
+        },
+        //ลบออก
+        {
+            "tier_index": [1],
+            "model_id": 20000
+        },
+        {
+            "tier_index": [2], => จะกลายเป็น [1] แทน
+            "model_id": 20000
+        }
+    ]
+}
+
+Scenaori 3: เคสมีโครงสร้างไว้แล้ว ระดับเดียวกัน 1 level
