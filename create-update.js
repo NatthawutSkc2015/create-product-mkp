@@ -204,9 +204,11 @@ function templateFormSku (number) {
             <div class="col-3">
                 <label for="">Image</label>
                 <input type="file" class="form-control form-control-sm" placeholder="image" name="skus[${number}][image]" id="" onchange="uploadImageChild(this)" accept="image/png, image/jpeg" >
-                <img src="" class="preview-img mt-2 w-100">
+                <img src="" class="preview-img mt-2 w-25">
             </div>
-            <div class="col-1 ml-auto text-right"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this, 'sku')">-</button></div>
+            <div class="col-1 ml-auto text-right">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this, 'sku')">-</button>
+            </div>
             <div class="col-12 attrs mt-2">
                 <label for="">
                     Attribues
@@ -214,10 +216,10 @@ function templateFormSku (number) {
                 </label>
                 <div class="row">
                     <div class="col-6">
-                        <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[${number}][sales_attributes][0][name]" id="" required value="Color">
+                        <input type="text" class="form-control form-control-sm" placeholder="Name" name="skus[${number}][sales_attributes][0][name]" id="" required value="">
                     </div>
                     <div class="col-5">
-                        <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[${number}][sales_attributes][0][value]" id="" required value="Black">
+                        <input type="text" class="form-control form-control-sm" placeholder="Value" name="skus[${number}][sales_attributes][0][value]" id="" required value="">
                     </div>
                     <div class="col-1">
                         <button type="button" class="btn btn-secondary btn-sm" onclick="addAttr(this)">+</button>
@@ -549,7 +551,17 @@ formCreate.addEventListener('submit', async (el) => {
     //Sent to create/update product
     const responseCreateUpdateProduct = await requestData(methodSent.method, methodSent.endpoint, {}, paramsCreate)
     await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })
-    await swal.close()
+
+    if (responseCreateUpdateProduct.status == false || responseCreateUpdateProduct.data.code != 0) {
+        return Swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(responseCreateUpdateProduct,null,2)}</pre></div>`,
+            title: 'Error',
+            width: '1000px'
+        })
+    } else {
+        await swal.close()
+        openPopup('Success', true)
+    }
 
     // Handle element
     document.querySelector('#respnseCreateProduct').innerHTML = `<pre>${JSON.stringify(responseCreateUpdateProduct, null, 2)}</pre>`

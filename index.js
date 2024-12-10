@@ -37,7 +37,10 @@ function renderTableProducts () {
             html += `
                 <td>
                     <a href="create-update.html?env=${envId}&shop=${shopId}&id=${product.id}&action=edit" target="_blank" class="btn btn-secondary btn-sm"><i class="bi bi-pen"></i></a>
-                    <a href="" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                    <a href="javascript: void(0);" onclick="deleteProduct('${product.id}')" class="btn btn-danger btn-sm" title="ลบ"><i class="bi bi-trash" ></i></a>
+                    <a href="javascript: void(0);" onclick="recoverProduct('${product.id}')" class="btn btn-primary btn-sm" title="กู้คืน"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a href="javascript: void(0);" onclick="activateProduct('${product.id}')" class="btn btn-success btn-sm" title="เปิดใช้งาน"><i class="bi bi-wifi"></i></a>
+                    <a href="javascript: void(0);" onclick="deActivateProduct('${product.id}')" class="btn btn-dark btn-sm" title="ปิดใช้งาน"><i class="bi bi-wifi-off"></i></a>
                 </td>
             `
         html += '</tr>'
@@ -191,6 +194,21 @@ function fullDetail(type, id, id2) {
             }
             break
         case 'Line Myshop':
+            const productLineMyShop = findProduct.line_myshop.info
+            switch (type) {
+                case 'image-parent':
+                    title = `Images product : ${findProduct.imageUrls}`
+                    html += '<div class="row">'
+                        if (Array.isArray(productLineMyShop.imageUrls)) {
+                            productLineMyShop.imageUrls.forEach(image => {
+                                html += '<div class="col-3 mt-3">'
+                                    html += `<img src="${image}" class="w-100" style="border: 1px solid #cfcbcb; border-radius: 6px;">`
+                                html += '</div>'
+                            })
+                        }
+                    html += '<div>'
+                    break
+            }
             break
     }
     switch (type) {
@@ -211,36 +229,36 @@ function productStatus(str) {
     switch (platformName) {
         case 'Tiktok Shop':
             status = {
-                'PENDING' : 'รอดำเนินการ',
-                'FAILED' : 'ล้มเหลว',
-                'SELLER_DEACTIVATED' : 'ผู้ขายยกเลิกการใช้งาน',
-                'PLATFORM_DEACTIVATED' : 'แพลตฟอร์มยกเลิกการใช้งาน',
-                'LIVE' : 'เปิดใช้งาน',
-                'DRAFT': 'ฉบับร่าง',
-                'DELETED': 'ผู้ขายลบ',
+                'PENDING' : '<span class="badge rounded-pill bg-dark">รอดำเนินการ</div>',
+                'FAILED' : '<span class="badge rounded-pill bg-light text-dark">ล้มเหลว</div>',
+                'SELLER_DEACTIVATED' : '<div class="badge rounded-pill bg-warning text-dark">ปิดใช้งาน</div>',
+                'PLATFORM_DEACTIVATED' : '<div class="badge rounded-pill bg-warning text-dark"> แพลตฟอร์มยกเลิกการใช้งาน <div>',
+                'LIVE' : '<span class="badge rounded-pill bg-success">วางขายอยู่</div>',
+                'DRAFT': '<span class="badge rounded-pill bg-secondary">ฉบับร่าง</div>',
+                'DELETED': '<span class="badge rounded-pill bg-danger">ลบแล้ว</div>',
             }[str]
             break
         case 'Shopee':
             status = {
-                'NORMAL': 'เปิดใช้งาน',
-                'DELETED': 'ลบ',
-                'UNLIST': 'ปิด',
-                'BANNED': 'แบน',
+                'NORMAL': '<span class="badge rounded-pill bg-success">เปิดใช้งาน</div>',
+                'SELLER_DELETE': '<span class="badge rounded-pill bg-danger">ลบ</div>',
+                'UNLIST': '<div class="badge rounded-pill bg-warning text-dark">ปิด</div>',
+                'BANNED': '<span class="badge rounded-pill bg-dark">แบน</div>',
             }[str]
             break
         case 'Lazada':
             status = {
-                'Active' : 'เปิดใช้งาน',
-                'InActive': 'ปิดใช้งาน',
-                'Pending QC': 'รอตรวจสอบ',
-                'Suspended': 'ถูกระงับ',
-                'Deleted': 'ลบ',
+                'Active' : '<span class="badge rounded-pill bg-success">เปิดใช้งาน</div>',
+                'InActive': '<div class="badge rounded-pill bg-warning text-dark">ปิดใช้งาน</div>',
+                'Pending QC': '<span class="badge rounded-pill bg-dark">รอตรวจสอบ</div>',
+                'Suspended': '<span class="badge rounded-pill bg-dark">ถูกระงับ</div>',
+                'Deleted': '<span class="badge rounded-pill bg-danger">ลบ</div>',
             }[str]
             break
         case 'Line Myshop':
             status = {
-                'sale': 'เปิดใช้งาน',
-                'hold': 'ปิดใช้งาน',
+                'sale': '<span class="badge rounded-pill bg-success">เปิดใช้งาน</div>',
+                'hold': '<div class="badge rounded-pill bg-warning text-dark">ปิดใช้งาน</div>',
             }[str]
             break
     }
@@ -255,7 +273,7 @@ async function loadData() {
     })
     if (getProducts.status) {
         // console.log( getProducts.data.data.map(p => p.platform.name))
-        const productsMkp = getProducts.data.data.filter(p => p.platform.name == platformName).reverse()
+        const productsMkp = getProducts.data.data.filter(p => p.platform.name == platformName)
         products = []
         switch (platformName) {
             case 'Tiktok Shop':
@@ -270,10 +288,10 @@ async function loadData() {
                         return cate.local_name
                     }).join(' > ')
                     product.brand = '-'
-                    product.weight = productTiktok?.package_weight + ' km'
-                    product.width = productTiktok?.package_height + ' cm'
-                    product.height = productTiktok?.package_height + ' cm'
-                    product.length = productTiktok?.package_length + ' cm'
+                    product.weight = productTiktok?.package_weight || 0 + ' kg'
+                    product.width = productTiktok?.package_height || 0 + ' cm'
+                    product.height = productTiktok?.package_height || 0 + ' cm'
+                    product.length = productTiktok?.package_length || 0 + ' cm'
                     product.option_logistic = '-'
                     product.open_cod = ''
                     product.attrs = ''
@@ -310,7 +328,7 @@ async function loadData() {
                         return sku
                     })
                     return product
-                })
+                }).filter(p => ['PENDING','LIVE','SELLER_DEACTIVATED','DELETED'].includes(p.status))
                 break
             case 'Shopee':
                 products = productsMkp.map(product => {
@@ -438,6 +456,7 @@ async function loadData() {
                     product.status = productLineMyshop.status
                     product.quantity = 0
                     product.type = 'simple'
+                    product.image = productLineMyshop.imageUrls[0]
                     if (productLineMyshop.hasOnlyDefaultVariant) {
                         product.type = 'config'
                     }
@@ -463,6 +482,75 @@ async function loadData() {
         document.querySelector('#productsList tbody').innerHTML = renderTableProducts()
     }
 }
+
+async function deleteProduct(id) {
+    openPopup('Send data')
+    const deleteProduct = await requestData('put', `/api/v1/products/${id}/delete`)
+    if (deleteProduct.status == false || deleteProduct.data.code != 0) {
+        return Swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            title: 'Error',
+            width: '1000px'
+        })
+    }
+    openPopup('Success, refresh data', true).then(async (result) => {
+        if (result.isConfirmed) {
+            await loadData()
+        }
+    })
+}
+
+async function recoverProduct(id) {
+    openPopup('Send data')
+    const deleteProduct = await requestData('put', `/api/v1/products/${id}/recover`)
+    if (deleteProduct.status == false || deleteProduct.data.code != 0) {
+        return Swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            title: 'Error',
+            width: '1000px'
+        })
+    }
+    openPopup('Success, refresh data', true).then(async (result) => {
+        if (result.isConfirmed) {
+            await loadData()
+        }
+    })
+}
+
+async function activateProduct(id) {
+    openPopup('Send data')
+    const deleteProduct = await requestData('put', `/api/v1/products/${id}/status`, {}, { status: 'activate' })
+    if (deleteProduct.status == false || deleteProduct.data.code != 0) {
+        return Swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            title: 'Error',
+            width: '1000px'
+        })
+    }
+    openPopup('Success, refresh data', true).then(async (result) => {
+        if (result.isConfirmed) {
+            await loadData()
+        }
+    })
+}
+
+async function deActivateProduct(id) {
+    openPopup('Send data')
+    const deleteProduct = await requestData('put', `/api/v1/products/${id}/status`, {}, { status: 'deactivate' })
+    if (deleteProduct.status == false || deleteProduct.data.code != 0) {
+        return Swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            title: 'Error',
+            width: '1000px'
+        })
+    }
+    openPopup('Success, refresh data', true).then(async (result) => {
+        if (result.isConfirmed) {
+            await loadData()
+        }
+    })
+}
+
 
 // =========== Event : select env =====================
 inputEnv.addEventListener('change',async (e) => {

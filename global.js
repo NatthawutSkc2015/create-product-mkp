@@ -127,7 +127,7 @@ async function requestData2(method, endpoint, params = {}, data) {
 }
 
 function openPopup(msg, showConfirmButton = false, allowOutsideClick = false) {
-    Swal.fire({
+    return Swal.fire({
         title: 'Info',
         text: msg,
         icon: 'warning',

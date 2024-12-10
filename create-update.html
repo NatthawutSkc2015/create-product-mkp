@@ -51,6 +51,10 @@
                             <tr>
                                 <td colspan="2" class="text-center"><h5>Prepare data</h5></td>
                             </tr>
+                            <tr class="d-none" id="product_id">
+                                <td><label for="">ID</label></td>
+                                <td></td>
+                            </tr>
                             <tr class="">
                                 <td><label for="">Category</label></td>
                                 <td id="form_cate_cascader">
@@ -151,11 +155,9 @@
                                         <div class="col-3">
                                             <label for="">Image</label>
                                             <input type="file" class="form-control form-control-sm upload-image" placeholder="image" name="skus[0][image]" onchange="selectImage(this)">
-                                            <img src="" class="preview-img mt-2 w-100">
+                                            <img src="" class="preview-img mt-2 w-25">
                                         </div>
-                                        <div class="col-1 ml-auto text-right">
-                                           
-                                        </div>
+                                        <div class="col-1 ml-auto text-right"></div>
                                         
                                         <div class="col-12 attrs mt-2">
                                             <label for="">

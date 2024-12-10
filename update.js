@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded',async function() {
                 const selectedOption = inputShop.options[inputShop.selectedIndex]
                 platformName = selectedOption.getAttribute('data-platform')
 
+                
+
                 // Get product detail
                 let getProductDetail = await requestData('get', `/api/v1/products/${queryProductId}`)
                 if (getProductDetail.status) {
@@ -36,6 +38,8 @@ document.addEventListener('DOMContentLoaded',async function() {
                     dataProduct = getProductDetail
                     document.querySelector('#title_page').textContent = `Update product ${ getProductDetail.name }`
                     const categoryId = getProductDetail.category
+
+                    
 
                     // Brand 
                     await getBrands(categoryId)
@@ -52,10 +56,47 @@ document.addEventListener('DOMContentLoaded',async function() {
                         urlsImage.push(img)
                     }
                     renderPreviewImages()
+
+                    const trProductID  = document.querySelector('#product_id')
+                    trProductID.classList.remove('d-none')
+                    
                     
                     // Split data to platform
                     switch (platformName) {
                         case 'Tiktok Shop':
+                            trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.product_id
+                            if (getProductDetail.info.skus.length == 1) {
+                                const findProduct = getProductDetail.info.skus.find((sku, index) => index == 0)
+                                if (findProduct.sales_attributes.length) {
+                                    getProductDetail.type = 'config'
+                                    getProductDetail.items = getProductDetail.info.skus.map((sku, index) => {
+                                        const variation = []
+                                        let imageUrls = []
+                                        let attributeQuantity = 0
+                                        sku.sales_attributes.forEach((attribute) => {
+                                            if (Array.isArray(attribute?.sku_img?.url_list)) {
+                                                imageUrls.push(...attribute.sku_img.url_list.splice(0,1))
+                                            }
+                                            variation.push({
+                                            name: attribute.name,
+                                            value_name: attribute.value_name,
+                                            })
+                                        })
+                                        sku.stock_infos.forEach((stock) => {
+                                            attributeQuantity += stock.available_stock
+                                        })
+                                        return {
+                                            model_id: sku.id,
+                                            images: [],
+                                            sku: variation.map(v => v.value_name).join(' '),
+                                            quantity: attributeQuantity,
+                                            price: sku.price.original_price,
+                                            weight: 0,
+                                            variation: variation
+                                        }
+                                    })
+                                }
+                            }
                             break
                         case 'Shopee':
                             await getStatus()
@@ -68,8 +109,10 @@ document.addEventListener('DOMContentLoaded',async function() {
                             }
                             formFormOpenCod.querySelector('[name="is_cod"]').checked = getProductDetail.is_cod_open
                             break
+                        case 'Lazada':
+                            trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.item_id
+                            break
                     }
-
                     // Set form
                     categoryInput.value = categoryId
                     instanceCategoryCascaderMenu.val(pathCategoryCascader(categoryId))
@@ -115,6 +158,8 @@ document.addEventListener('DOMContentLoaded',async function() {
                             const amountItem = document.querySelectorAll('#form_skus_body .child').length
                             formSkusBody.insertAdjacentHTML('beforeend', templateFormSku(amountItem))
                             
+
+                            
                             const childContainer = formSkusBody.querySelector(`.child:nth-child(${index + 1})`)
                             childContainer.querySelector(`.preview-img`).src = sku.images[0] || noImage
                             childContainer.querySelector(`[name="skus[${index}][id]"]`).value = sku.model_id
@@ -122,11 +167,15 @@ document.addEventListener('DOMContentLoaded',async function() {
                             childContainer.querySelector(`[name="skus[${index}][quantity]"]`).value = sku.quantity
                             childContainer.querySelector(`[name="skus[${index}][price]"]`).value = sku.price
                             childContainer.querySelector(`[name="skus[${index}][weight]"]`).value = sku.weight || 0
+                            
                             // set variant
-                            const bodyAttrs = childContainer.querySelector(`.attrs .row`)
-                            bodyAttrs.innerHTML = ''
+                            const bodyAttrs = childContainer.querySelector(`.attrs`)
+                            if (sku.variation.length > 1) {
+                                for (let i = 0; i < sku.variation.length - 1; i++) {
+                                    bodyAttrs.insertAdjacentHTML('beforeend', templateFormAttributeSKu(index, i + 1))
+                                }
+                            }
                             for (const [k ,attr] of sku.variation.entries()) {
-                                bodyAttrs.insertAdjacentHTML('beforeend', templateFormAttributeSKu(index, k))
                                 childContainer.querySelector(`[name="skus[${index}][sales_attributes][${k}][name]"]`).value = attr.name
                                 childContainer.querySelector(`[name="skus[${index}][sales_attributes][${k}][value]"]`).value = attr.value_name
                             }
