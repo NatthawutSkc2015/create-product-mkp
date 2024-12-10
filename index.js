@@ -208,6 +208,12 @@ function fullDetail(type, id, id2) {
                         }
                     html += '<div>'
                     break
+                case 'description':
+                    title = `Description product ${findProduct.name}`
+                    html += findProduct.line_myshop.info.description
+                    break
+                case 'attributes':
+                    break;
             }
             break
     }
@@ -267,7 +273,7 @@ function productStatus(str) {
 async function loadData() {
     openPopup('Loading Products')
     const getProducts = await requestData2('get', '/products', {
-        per_page: 100,
+        per_page: 1000,
         shop: shopId,
         platform: platformId,
     })
@@ -319,8 +325,8 @@ async function loadData() {
                         const findStockInfos = sku.stock_infos.find((_, ii) => ii == index)
                         sku.attrs = sku.sales_attributes.map((attr) => {
                             imageChild = sku.sales_attributes[0]?.sku_img?.url_list[0] || ''
-                            return `${attr.name} : ${attr.value_name}`
-                        }).join(', ')
+                            return `<div> ${attr.name} : ${attr.value_name}</div>`
+                        }).join('')
                         sku.price = sku.price.original_price
                         sku.quantity = findStockInfos?.available_stock || 0
                         sku.sku = sku.seller_sku
@@ -368,7 +374,7 @@ async function loadData() {
                                     if (tierVariation[index].option_list[tier].image) {
                                         imageChild = tierVariation[index].option_list[tier].image.image_url
                                     }
-                                    attrs.push(`${tierVariation[index].name}: ${tierVariation[index].option_list[tier].option}`)
+                                    attrs.push(`<div> ${tierVariation[index].name}: ${tierVariation[index].option_list[tier].option} </div>`)
                                 })
                             }
                             return {
@@ -376,7 +382,7 @@ async function loadData() {
                                 sku: sku.model_sku,
                                 price: sku.price_info[0]?.original_price,
                                 quantity: sku.stock_info_v2?.summary_info?.total_available_stock || 0,
-                                attrs: attrs.join(','),
+                                attrs: attrs.join(''),
                                 image: imageChild || noImage
                             }
                         })
@@ -419,7 +425,7 @@ async function loadData() {
                         product.type = 'config'
                         product.skus = productLazada.skus.map(sku => {
                             const attrs = Object.keys(sku.saleProp).map(key => {
-                                return `${key} : ${sku.saleProp[key]}`
+                                return `<div>${key} : ${sku.saleProp[key]} </div>`
                             })
                             const imageSku = sku?.Images || []
                             return {
@@ -427,13 +433,13 @@ async function loadData() {
                                 sku: `${sku.SellerSku}`,
                                 price: sku.price + ' THB',
                                 quantity: sku.quantity,
-                                attrs: attrs.join(','),
+                                attrs: attrs.join(''),
                                 image: imageSku[0] || noImage
                             }
                         })
                     }
                     return product
-                }).filter(p => p.status == 'Active')
+                }).filter(p => ['Active'].includes(p.status))
                 break
             case 'Line Myshop':
                 products = productsMkp.map(product => {
@@ -468,14 +474,13 @@ async function loadData() {
                                 sku: sku.sku || '',
                                 price: sku.price + ' THB',
                                 quantity: sku.onHandNumber,
-                                attrs: [],
+                                attrs: sku.options.map(attr => `<div>${attr.name} : ${attr.value}</div>`).join(''),
                                 image: sku.imageUrl || noImage
                             }
                         })
                     }
                     return product
                 })
-                console.log(products)
                 break
         }
         swal.close()
@@ -505,7 +510,7 @@ async function recoverProduct(id) {
     const deleteProduct = await requestData('put', `/api/v1/products/${id}/recover`)
     if (deleteProduct.status == false || deleteProduct.data.code != 0) {
         return Swal.fire({
-            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct, null,2)}</pre></div>`,
             title: 'Error',
             width: '1000px'
         })
@@ -522,7 +527,7 @@ async function activateProduct(id) {
     const deleteProduct = await requestData('put', `/api/v1/products/${id}/status`, {}, { status: 'activate' })
     if (deleteProduct.status == false || deleteProduct.data.code != 0) {
         return Swal.fire({
-            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct, null,2)}</pre></div>`,
             title: 'Error',
             width: '1000px'
         })
@@ -539,7 +544,7 @@ async function deActivateProduct(id) {
     const deleteProduct = await requestData('put', `/api/v1/products/${id}/status`, {}, { status: 'deactivate' })
     if (deleteProduct.status == false || deleteProduct.data.code != 0) {
         return Swal.fire({
-            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct,null,2)}</pre></div>`,
+            html: `<div class="text-start"><pre>${JSON.stringify(deleteProduct, null,2)}</pre></div>`,
             title: 'Error',
             width: '1000px'
         })

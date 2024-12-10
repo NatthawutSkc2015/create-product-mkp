@@ -102,14 +102,21 @@ async function renderAttributes(categoryId) {
                 category_id: categoryId
             })
             if (getAttributeByCategory.status == false) {
-                return openPopup(JSON.signature(getAttributeByCategory.data, true))
+                return Swal.fire({
+                    html: `<div class="text-start"><pre>${JSON.stringify(getAttributeByCategory, null,2)}</pre></div>`,
+                    title: 'Error getAttributeByCategory',
+                    width: '1000px'
+                })
             }
-            attrs = getAttributeByCategory.data.data.filter(attr => attr.is_requried)
+            attrs = getAttributeByCategory.data.data
+                .filter(attr => attr.input_type != 'img')
+                .filter(attr => attr.is_requried)
             for (const attr of attrs) {
                 attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">*required</span></label>`
                 switch (attr.input_type) {
                     case 'text':
-                        attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}">`
+                    case 'richText':
+                        attributesHtml += `<textarea type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}" rows="3"></textarea>`
                         break
                     case 'numeric':
                         attributesHtml += `<input type="number" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.name}" value="30">`
@@ -158,22 +165,24 @@ async function renderAttributes(categoryId) {
                 category_id: categoryId
             })
             if (getAttributeByCategory.status == false) {
-                return openPopup(JSON.signature(getAttributeByCategory.data, true))
+                return Swal.fire({
+                    html: `<div class="text-start"><pre>${JSON.stringify(getAttributeByCategory, null,2)}</pre></div>`,
+                    title: 'Error getAttributeByCategory',
+                    width: '1000px'
+                })
             }
-            attrs = getAttributeByCategory.data.data
+            attrs = getAttributeByCategory.data.data.filter(attr => attr.attribute_type == 'PRODUCT_PROPERTY')
             for (const attr of attrs) {
                 attributesHtml += `<div class="col-4 mt-1"><label>${attr.label} <span class="text-danger">${ attr.is_requried ? '*required' : '' }</span></label>`
                 if (Array.isArray(attr.options)) { //select option
-                    attributesHtml += `<select class="form-control form-control-sm" name="attributes.${attr.id}" placeholder="${attr.label}" >`
+                    attributesHtml += `<select class="form-control form-control-sm" ${attr.is_multiple_selection ? `multiple style="height: 300px;"` : ''} name="attributes.${attr.id}" placeholder="${attr.label}" >`
                     attributesHtml += `<option value="">------ None ------</option>`
                     if (Array.isArray(attr.options)) {
                         for (const opt of attr.options) {
-                            attributesHtml += `<option value="${opt.id}">${opt.name}</option>`
+                            attributesHtml += `<option value="${opt.id}" data-name="${opt.name}">${opt.name}</option>`
                         }
                     }
                     attributesHtml += `</select>`
-                } else { //text
-                    attributesHtml += `<input type="text" class="form-control form-control-sm" placeholder="${attr.label}" name="attributes.${attr.id}">`
                 }
                 attributesHtml += '</div>'
             }
@@ -395,14 +404,7 @@ formCreate.addEventListener('submit', async (el) => {
             return o[key];
         }, obj)
     }
-    const setValue2 = (obj, path, value) => {
-        const keys = path.replace(/\[(\w+)\]/g, '.$1').split('.')
-        keys.reduce((o, key, i) => {
-            if (i === keys.length - 1) o[key] = value
-            else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : {})
-            return o[key];
-        }, obj)
-    }
+    
     const paramsCreate = {}
     const formData = new FormData(formCreate)
     for (const [key, value] of formData.entries()) {
@@ -415,26 +417,22 @@ formCreate.addEventListener('submit', async (el) => {
         } else if (input && input.type === "radio") {
             const checkedRadio = formCreate.querySelector(`[name="${key}"]:checked`);
             setValue(paramsCreate, key, checkedRadio ? checkedRadio.id : null)
-        } else if (input.tagName == "SELECT") {
-            let selectedOptions
-            if (platformName == 'Tiktok Shop' && key.match(/attributes.*/)) {
-                if (input.type == 'select-multiple') {
-                    selectedOptions = Array.from(input.selectedOptions).map((option) => {
-                        return {
-                            id: option.value,
-                            name: option.innerText
-                        }
-                    })
-                    setValue(paramsCreate, key, selectedOptions)
-                } else if (input.type == 'select-one') {
-                    if (value) {
-                        setValue(paramsCreate, key, value)
+        } else if (input.tagName == "SELECT" && key.match(/attributes.*/) && platformName == 'Tiktok Shop') {
+            if (input.type == 'select-multiple') {
+                selectedOptions = Array.from(input.selectedOptions).map((option) => {
+                    return {
+                        id: option.value,
+                        value: option.innerText
                     }
-                }
+                })
+                setValue(paramsCreate, key, selectedOptions)
             } else {
-                selectedOptions = value
+                const selectedOption = input.options[input.selectedIndex]
+                setValue(paramsCreate, key, {
+                    id: value,
+                    value: selectedOption.getAttribute('data-name')
+                })
             }
-            setValue2(paramsCreate, key, selectedOptions)
         } else {
             setValue(paramsCreate, key, value)
         }
@@ -467,7 +465,6 @@ formCreate.addEventListener('submit', async (el) => {
         return openPopup('please select image !', true)
     }
     paramsCreate.images = images
-    
 
     // Set default form
     paramsCreate.is_cod = document.querySelector('[name="is_cod"]').checked
@@ -492,8 +489,6 @@ formCreate.addEventListener('submit', async (el) => {
     } else {
         paramsCreate.skus = []
     }
-
-
     switch (platformName) {
         case 'Shopee': //shopee
             if (action == 'create') {
@@ -520,19 +515,32 @@ formCreate.addEventListener('submit', async (el) => {
             }
             break
         case 'Tiktok Shop':
-            // paramsCreate.attributes = Object.keys(paramsCreate.attributes).map(attr => {
-            //     return {
-            //         id: attr,
-            //         value: paramsCreate.attributes[attr] || ''
-            //     }
-            // })
-            paramsCreate.attributes = []
+            paramsCreate.attributes = Object.keys(paramsCreate.attributes).map(attr => {
+                return {
+                    id: attr,
+                    value: paramsCreate.attributes[attr] || ''
+                }
+            })
+            paramsCreate.attributes = paramsCreate.attributes.filter(attr => (Array.isArray(attr.value) ? attr.value.length != 0 : attr.value.value != null)).reduce((obj, attr) => {
+                obj[attr.id] = attr.value
+                return obj
+            }, {})
+            break
+        case 'Lazada':
+            paramsCreate.attributes = Object.fromEntries(Object.entries(paramsCreate.attributes).filter(([key, value]) => value !== ""))
             break
         case 'Line MyShop':
-            
             break
 
     }
+
+    if (debug == 'true') {
+        return swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(paramsCreate,null,2)}</pre></div>`,
+            width: '1000px'
+        })
+    }
+
     let methodSent = {}
     if (action == 'create') {
         methodSent.endpoint = '/api/v1/products/create',
@@ -545,7 +553,7 @@ formCreate.addEventListener('submit', async (el) => {
     }
 
     //debug
-    // document.querySelector('#bodyCreateProduct').innerHTML = `<pre>${JSON.stringify(paramsCreate, null, 2)}</pre>`
+    document.querySelector('#bodyCreateProduct').innerHTML = `<pre>${JSON.stringify(paramsCreate, null, 2)}</pre>`
 
     // return
     //Sent to create/update product
@@ -555,7 +563,7 @@ formCreate.addEventListener('submit', async (el) => {
     if (responseCreateUpdateProduct.status == false || responseCreateUpdateProduct.data.code != 0) {
         return Swal.fire({
             html: `<div class="text-start"><pre>${JSON.stringify(responseCreateUpdateProduct,null,2)}</pre></div>`,
-            title: 'Error',
+            title: 'Error responseCreateUpdateProduct',
             width: '1000px'
         })
     } else {

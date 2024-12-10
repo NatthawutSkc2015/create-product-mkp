@@ -14,7 +14,7 @@
                 <label>การใช้งาน <span class="text-danger"></span></label>
                 <select name="attributes.100874" id="" multiple>
                     <option value="">------ None ------</option>
-                    <option value="1004502" >ของใช้ในบ้าน</option>
+                    <option value="1004502" selected>ของใช้ในบ้าน</option>
                     <option value="1004495" selected>เสื้อผ้า</option>
                 </select>
             </div>
@@ -36,7 +36,7 @@
                 <label>จํานวนต่อแพ็ค <span class="text-danger"></span></label><select
                     class="form-control form-control-sm" name="attributes.100347" placeholder="จํานวนต่อแพ็ค">
                     <option value="">------ None ------</option>
-                    <option value="1000256">1</option>
+                    <option value="1000256" selected>1</option>
                     <option value="1000257">2</option>
                     <option value="1000258">3</option>
                     <option value="1000347">4</option>
@@ -54,7 +54,7 @@
                 <label>วัสดุ <span class="text-danger"></span></label><select class="form-control form-control-sm"
                     name="attributes.100701" placeholder="วัสดุ">
                     <option value="">------ None ------</option>
-                    <option value="1000014">อะคริลิก</option>
+                    <option value="1000014" selected>อะคริลิก</option>
                     <option value="1001399">หยก</option>
                     <option value="1004217">แร่</option>
                     <option value="1000020">หิน</option>
@@ -90,7 +90,7 @@
                     <option value="1004430">เอเชียตะวันออกเฉียงใต้</option>
                     <option value="1004431">แบบดั้งเดิม</option>
                     <option value="1003637">แนวเขตร้อน</option>
-                    <option value="1003600">วินเทจ</option>
+                    <option value="1003600" selected>วินเทจ</option>
                 </select>
             </div>
             <div class="col-4 mt-1">
@@ -106,7 +106,7 @@
                     <option value="1004369">ตู้เสื้อผ้า</option>
                     <option value="1004366">การศึกษา</option>
                     <option value="1004364">สํานักงาน</option>
-                    <option value="1000268">สากล</option>
+                    <option value="1000268" selected>สากล</option>
                 </select>
             </div>
             <div class="col-4 mt-1">
@@ -121,7 +121,7 @@
                     <option value="1002263">พับได้</option>
                     <option value="1000330">กันน้ำ</option>
                     <option value="1002456">หมุนได้</option>
-                    <option value="1001442">กันฝุ่น</option>
+                    <option value="1001442" selected>กันฝุ่น</option>
                 </select>
             </div>
             <div class="col-4 mt-1">
@@ -135,7 +135,7 @@
                     <option value="1001503">สี่เหลี่ยมผืนผ้า</option>
                     <option value="1004390">สี่เหลี่ยมคางหมู</option>
                     <option value="1004384">ช่องโค้ง</option>
-                    <option value="1002243">ผิดปกติ</option>
+                    <option value="1002243" selected>ผิดปกติ</option>
                 </select>
             </div>
             <div class="col-4 mt-1">
@@ -147,7 +147,7 @@
                     <option value="1004417">มีลิ้นชัก</option>
                     <option value="1004420">มีล้อ</option>
                     <option value="1004416">มีช่อง</option>
-                    <option value="1004421">มีซิป</option>
+                    <option value="1004421" selected>มีซิป</option>
                 </select>
             </div>
             <div class="col-4 mt-1">
@@ -159,56 +159,82 @@
                     class="form-control form-control-sm" name="attributes.size" placeholder="ประเภทของการจัดเก็บ">
                     <option value="">------ None ------</option>
                     <option value="m">M</option>
-                    <option value="a">A</option>
+                    <option value="a" selected>A</option>
                 </select>
             </div>
         </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        const formCreate = document.querySelector("#form");
-        const setValue = (obj, path, value) => {
-            const keys = path.replace(/\[(\w+)\]/g, ".$1").split(".");
-            keys.reduce((o, key, i) => {
-                if (i === keys.length - 1) o[key] = value;
-                else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : {});
-                return o[key];
-            }, obj);
-        };
-        const paramsCreate = {};
-        const formData = new FormData(formCreate);
-        for (const [key, value] of formData.entries()) {
-            const input = formCreate.querySelector(`[name="${key}"]`);
-            if (input && input.type === "checkbox") {
-                const checkedCheckboxes = Array.from(
-                    formCreate.querySelectorAll(`[name="${key}"]:checked`)
-                ).map((checkbox) => checkbox.id);
-                setValue(paramsCreate, key, checkedCheckboxes);
-            } else if (input && input.type === "radio") {
-                const checkedRadio = formCreate.querySelector(
-                    `[name="${key}"]:checked`
-                );
-                setValue(paramsCreate, key, checkedRadio ? checkedRadio.id : null);
-            } else if (input.tagName === "SELECT") {
-                if (input.type == 'select-multiple') {
-                    const selectedOptions = Array.from(input.selectedOptions).map((option) => {
-                        return {
-                            id: option.value,
-                            name: option.innerText
-                        }
-                    })
-                    setValue(paramsCreate, key, selectedOptions)
-                } else if (input.type == 'select-one') {
-                    if (value) {
-                        setValue(paramsCreate, key, value)
-                    }
-                }
-            } else {
-                setValue(paramsCreate, key, value);
+        // ============= Event : Onload page ====================
+        document.addEventListener('DOMContentLoaded', async function() {
+            const platformName = 'Tiktok Shop'
+            const formCreate = document.querySelector("#form");
+            const setValue = (obj, path, value) => {
+                const keys = path.replace(/\[(\w+)\]/g, ".$1").split(".");
+                keys.reduce((o, key, i) => {
+                    if (i === keys.length - 1) o[key] = value;
+                    else o[key] = o[key] || (isNaN(keys[i + 1]) ? {} : {});
+                    return o[key];
+                }, obj);
+            };
+            const paramsCreate = {};
+            
+            function mapData() {
+                
             }
-        }
-        console.log(paramsCreate);
-        axios.post("/test.html", paramsCreate);
+            const formData = new FormData(formCreate);
+            for (const [key, value] of formData.entries()) {
+                const input = formCreate.querySelector(`[name="${key}"]`);
+                if (input && input.type === "checkbox") {
+                    const checkedCheckboxes = Array.from(
+                        formCreate.querySelectorAll(`[name="${key}"]:checked`)
+                    ).map((checkbox) => checkbox.id);
+                    setValue(paramsCreate, key, checkedCheckboxes);
+                } else if (input && input.type === "radio") {
+                    const checkedRadio = formCreate.querySelector(
+                        `[name="${key}"]:checked`
+                    );
+                    setValue(paramsCreate, key, checkedRadio ? checkedRadio.id : null);
+                } else if (input.tagName === "SELECT") {
+                    // if (input.type == 'select-multiple') {
+                    //     const selectedOptions = Array.from(input.selectedOptions).map((option) => {
+                    //         return {
+                    //             id: option.value,
+                    //             name: option.innerText
+                    //         }
+                    //     })
+                    //     setValue(paramsCreate, key, selectedOptions)
+                    // } else if (input.type == 'select-one') {
+                    //     if (value) {
+                    //         setValue(paramsCreate, key, value)
+                    //     }
+                    // }
+                    if (platformName == 'Tiktok Shop' && key.match(/attributes.*/)) {
+                        if (input.type == 'select-multiple') {
+                            selectedOptions = Array.from(input.selectedOptions).map((option) => {
+                                return {
+                                    id: option.value,
+                                    name: option.innerText
+                                }
+                            })
+                            setValue(paramsCreate, key, selectedOptions)
+                        } else if (input.type == 'select-one') {
+                            if (value) {
+                                setValue(paramsCreate, key, value)
+                            }
+                        }
+                    } else {
+                        selectedOptions = value
+                    }
+
+                } else {
+                    setValue(paramsCreate, key, value);
+                }
+            }
+            
+            axios.post("/test.html", paramsCreate);
+        })
     </script>
 </body>
 

@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded',async function() {
     const queryShopId = urlParams.get('shop')
     const queryProductId = urlParams.get('id')
     const queryAction = urlParams.get('action')
+    const queryDebug = urlParams.get('debug')
+    debug = queryDebug
     
     if (queryAction == 'edit') {
         action = 'edit'
@@ -111,6 +113,10 @@ document.addEventListener('DOMContentLoaded',async function() {
                             break
                         case 'Lazada':
                             trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.item_id
+                            console.log('ok')
+                            break
+                        case 'Line Myshop':
+
                             break
                     }
                     // Set form

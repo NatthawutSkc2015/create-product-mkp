@@ -1,5 +1,6 @@
 // ============== Global Variable ==================
 const noImage = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
+let debug = ''
 let action = 'create'
 let productId = ''
 let envId = ''
@@ -23,7 +24,7 @@ let inputHeight = document.querySelector('[name="height"]')
 let inputWeight = document.querySelector('[name="weight"]')
 let inputLength = document.querySelector('[name="length"]')
 let inputQuantity = document.querySelector('[name="quantity"]')
-let dataProduct = {}
+let dataProduct
 let dataBrands = []
 let dataCategories = []
 let formDataImage = new FormData()
@@ -195,8 +196,11 @@ async function getShops() {
 async function renderCategories() {
     dataCategories = await requestData('get', '/api/v1/products/catgories')
     if (dataCategories.status == false || dataCategories.data.code != 0) {
-        openPopup(JSON.stringify(dataCategories,null, 2), true)
-        return false
+        return Swal.fire({
+            html: `<div class="text-start"><pre>${JSON.stringify(dataCategories, null,2)}</pre></div>`,
+            title: 'Error renderCategories',
+            width: '1000px'
+        })
     }
     
     dataCategories = dataCategories.data.data
