@@ -97,6 +97,11 @@ async function renderAttributes(categoryId) {
     let getAttributeByCategory
     let attrs = []
     switch (platformName) {
+        case 'Shopee':
+            getAttributeByCategory = await requestData('get', '/api/v1/products/attributes', {
+                category_id: categoryId
+            })
+            break
         case 'Lazada': //lazada
             getAttributeByCategory = await requestData('get', '/api/v1/products/attributes', {
                 category_id: categoryId
@@ -328,13 +333,12 @@ inputShop.addEventListener('change',async (e) => {
         case 'Tiktok Shop': //tiktok
             break
         case 'Line Myshop': //line 
-            formStatus.classList.remove('d-none')
-            for (const obj of statusesProduct.line_myshop) {
-                const opt = document.createElement('option');
-                opt.value = obj.value
-                opt.innerHTML = obj.text
-                inputStatus.appendChild(opt)
-            }
+            // for (const obj of statusesProduct.line_myshop) {
+            //     const opt = document.createElement('option');
+            //     opt.value = obj.value
+            //     opt.innerHTML = obj.text
+            //     inputStatus.appendChild(opt)
+            // }
             break
         case 'Lazada': //lazada
             formHeight.classList.add('d-none')
@@ -545,10 +549,14 @@ formCreate.addEventListener('submit', async (el) => {
     if (action == 'create') {
         methodSent.endpoint = '/api/v1/products/create',
         methodSent.method = 'post'
+        methodSent.params = {}
         openPopup('Send data to create product...')
     } if (action == 'edit') {
         methodSent.endpoint = `/api/v1/products/${productId}/edit`
         methodSent.method = 'put'
+        methodSent.params = {
+            // shop_id: shopId
+        }
         openPopup('Send data to update product...')
     }
 
@@ -557,7 +565,7 @@ formCreate.addEventListener('submit', async (el) => {
 
     // return
     //Sent to create/update product
-    const responseCreateUpdateProduct = await requestData(methodSent.method, methodSent.endpoint, {}, paramsCreate)
+    const responseCreateUpdateProduct = await requestData(methodSent.method, methodSent.endpoint, methodSent.params, paramsCreate)
     await new Promise((res,rej) => { setTimeout(() => { res('ok') }, 1000) })
 
     if (responseCreateUpdateProduct.status == false || responseCreateUpdateProduct.data.code != 0) {

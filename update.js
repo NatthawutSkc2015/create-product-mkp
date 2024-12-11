@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded',async function() {
                             }
                             break
                         case 'Shopee':
+                            trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.item_id
                             await getStatus()
                             await getLogistics()
 
@@ -113,10 +114,6 @@ document.addEventListener('DOMContentLoaded',async function() {
                             break
                         case 'Lazada':
                             trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.item_id
-                            console.log('ok')
-                            break
-                        case 'Line Myshop':
-
                             break
                     }
                     // Set form
@@ -144,14 +141,6 @@ document.addEventListener('DOMContentLoaded',async function() {
 
                     switch (platformName) {
                         case 'Line Myshop':
-                            formStatus.classList.remove('d-none')
-                            for (const obj of statusesProduct.line_myshop) {
-                                const opt = document.createElement('option');
-                                opt.value = obj.value
-                                opt.innerHTML = obj.text
-                                inputStatus.appendChild(opt)
-                            }
-                            inputStatus.value = getProductDetail.status ? 'onsale' : 'hide'
                             break
                     }
 
