@@ -262,9 +262,10 @@ function productStatus(str) {
             }[str]
             break
         case 'Line Myshop':
+            str = String(str)
             status = {
-                'sale': '<span class="badge rounded-pill bg-success">เปิดใช้งาน</div>',
-                'hold': '<div class="badge rounded-pill bg-warning text-dark">ปิดใช้งาน</div>',
+                'true': '<span class="badge rounded-pill bg-success">เปิดใช้งาน</div>',
+                'false': '<div class="badge rounded-pill bg-warning text-dark">ปิดใช้งาน</div>',
             }[str]
             break
     }
@@ -449,7 +450,6 @@ async function loadData() {
                     product.skus = []
                     product.price = 0
                     product.attrs = ''
-                    product.category = ''
                     product.brand = ''
                     product.weight = ''
                     product.width = ''
@@ -458,13 +458,18 @@ async function loadData() {
                     product.option_logistic = ''
                     product.open_cod = ''
                     product.attrs = ''
-                    product.description = ''
-                    product.status = productLineMyshop.status
+                    product.description = productLineMyshop.description
+                    product.status = productLineMyshop.isDisplay
                     product.quantity = 0
                     product.type = 'simple'
                     product.image = productLineMyshop.imageUrls[0]
+                    product.category = productLineMyshop?.category?.nameTh || ''
                     if (productLineMyshop.hasOnlyDefaultVariant) {
-                        product.type = 'config'
+                        const findSkusLineMyShop = productLineMyshop.variants.find((_, index) => index == 0)
+                        product.type = 'simple'
+                        product.price = findSkusLineMyShop.price + ' THB'
+                        product.quantity = findSkusLineMyShop.onHandNumber
+                        product.weight = findSkusLineMyShop.weight + ' gram'
                     }
                     if (productLineMyshop.hasOnlyDefaultVariant == false) {
                         product.type = 'config'

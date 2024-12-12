@@ -115,6 +115,9 @@ document.addEventListener('DOMContentLoaded',async function() {
                         case 'Lazada':
                             trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.item_id
                             break
+                        case 'Line Myshop':
+                            trProductID.querySelector('tr td:nth-child(2)').textContent = getProductDetail.info.id
+                            break
                     }
                     // Set form
                     categoryInput.value = categoryId
