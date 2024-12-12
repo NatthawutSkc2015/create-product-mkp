@@ -33,7 +33,7 @@ const envs = [
     {
         id: 'LOCAL',
         name: 'Localhost',
-        url: 'http://192.168.1.56:4000',
+        url: 'https://e1af-2001-44c8-43c0-ddbf-b0df-239c-441a-a8dc.ngrok-free.app',
         key: 'ab1049847e957ba4',
         secret: '986ecb64e253c685dde76b90e0f52ea2b4bcb6700f5436483a31ecff48d0c62d',
         auth_jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjUzMWVjM2IxYTcwODA5ZmU1YmVkZmMzIiwiaWF0IjoxNzMyNTAxMjY0LCJleHAiOjE3NjQwMzcyNjR9.iVAGiRfEOBKJUNszFMN0g9KHjz5wmgNF8Pgoju2O_aE'
