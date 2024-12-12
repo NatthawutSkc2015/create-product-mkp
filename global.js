@@ -42,9 +42,9 @@ const envs = [
         id: 'DEV',
         name: 'Dev',
         url: 'https://dev-api.syncorder.co',
-        key: '8619ebad17c092a4',
-        secret: '8aa025e228952d353302a025f5f8935458d65ac3b293c384b4b4d1c89011bdde',
-        auth_jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjNhYmU3NzYzNDg4OWFlNzA0M2JmYWQxIiwiaWF0IjoxNzMzMzAyMjgxLCJleHAiOjE3NjQ4MzgyODF9.gbfsNZF20s0VOXuhXynxXGU9TtVHHP-_JBEYM0NPzm0'
+        key: '9ec1548eca4140b6',
+        secret: '8489277fa5ae21de7fcb3928c6203e4ec031b25f6be6b58de108615f8d113c70',
+        auth_jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjNhYmU3NzYzNDg4OWFlNzA0M2JmYWQxIiwiaWF0IjoxNzMxMzc0Nzk1LCJleHAiOjE3NjI5MTA3OTV9.bI8DiFvHyfc6qljKg8TPXtfI_zgZMd982MUu7jIVgsc'
     },
     {
         id: 'UAT',
