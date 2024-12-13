@@ -280,7 +280,7 @@ async function loadData() {
     })
     if (getProducts.status) {
         // console.log( getProducts.data.data.map(p => p.platform.name))
-        const productsMkp = getProducts.data.data.filter(p => p.platform.name == platformName)
+        const productsMkp = getProducts.data.data.filter(p => p.platform.name == platformName).reverse()
         products = []
         switch (platformName) {
             case 'Tiktok Shop':
