@@ -1,3 +1,7 @@
+html.swal2-shown,
+body.swal2-shown {
+  overflow-y: scroll !important;
+}
 select {
     -webkit-appearance: auto!important;
     -moz-appearance: auto!important;
