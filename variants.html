@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Variants and Options Input</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .variant {
+            margin-bottom: 20px;
+        }
+        .variant input, .option input {
+            margin-right: 10px;
+        }
+        .option {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .variant-list {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dynamic Variants and Options Input</h1>
+    <div id="variants">
+        <!-- Dynamic Input Fields for Variants and Options -->
+    </div>
+    <button onclick="addVariant()">Add Variant</button>
+
+    <h2>Variant List</h2>
+    <div class="variant-list">
+        <table>
+            <thead>
+                <tr id="variant-header-row">
+                    <th>Retail Price</th>
+                    <th>Quantity</th>
+                    <th>Seller SKU</th>
+                </tr>
+            </thead>
+            <tbody id="variant-list-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function addVariant() {
+            const container = document.getElementById('variants');
+            const div = document.createElement('div');
+            div.className = 'variant';
+            div.innerHTML = `
+                <input type="text" placeholder="Enter variant name" class="variant-name" oninput="updateVariantList()">
+                <button onclick="addOption(this)">Add Option</button>
+                <button onclick="removeVariant(this)">Remove Variant</button>
+                <div class="options"></div>
+            `;
+            container.appendChild(div);
+            updateVariantList();
+        }
+
+        function addOption(button) {
+            const optionsContainer = button.parentElement.querySelector('.options');
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option';
+            optionDiv.innerHTML = `
+                <input type="text" placeholder="Enter option" oninput="updateVariantList()">
+                <button onclick="removeOption(this)">Remove Option</button>
+            `;
+            optionsContainer.appendChild(optionDiv);
+            updateVariantList();
+        }
+
+        function removeVariant(button) {
+            const variant = button.parentElement;
+            variant.remove();
+            updateVariantList();
+        }
+
+        function removeOption(button) {
+            const option = button.parentElement;
+            option.remove();
+            updateVariantList();
+        }
+
+        function updateVariantList() {
+            const tbody = document.getElementById('variant-list-body');
+            const headerRow = document.getElementById('variant-header-row');
+            tbody.innerHTML = '';
+
+            // Reset dynamic columns in the table header
+            while (headerRow.children.length > 3) {
+                headerRow.removeChild(headerRow.firstChild);
+            }
+
+            const variants = document.querySelectorAll('.variant');
+            let allOptions = [];
+
+            variants.forEach(variant => {
+                const variantName = variant.querySelector('.variant-name').value;
+                const options = Array.from(variant.querySelectorAll('.options input')).map(input => input.value).filter(value => value);
+
+                // Add variant name to the header row
+                if (variantName) {
+                    const header = document.createElement('th');
+                    header.textContent = variantName;
+                    headerRow.insertBefore(header, headerRow.firstChild);
+                }
+
+                allOptions.push({ variantName, options });
+            });
+
+            // Generate rows for the combinations
+            function generateCombinations(variants, index = 0, current = []) {
+                if (index === variants.length) {
+                    const row = document.createElement('tr');
+
+                    // Add variant values to the row
+                    current.forEach(value => {
+                        const cell = document.createElement('td');
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    });
+
+                    // Add input fields for price, quantity, SKU
+                    row.innerHTML += `
+                        <td><input type='text' placeholder='Enter price' name='skus[${index - 1}][qty]'></td>
+                        <td><input type='text' placeholder='Enter quantity' name='skus[${index - 1}][qty]'></td>
+                        <td><input type='text' placeholder='Enter SKU' name='skus[${index - 1}][sku]''></td>
+                    `;
+                    tbody.appendChild(row);
+                    return;
+                }
+
+                const variant = variants[index];
+                for (const option of variant.options) {
+                    generateCombinations(variants, index + 1, [...current, option]);
+                }
+            }
+
+            generateCombinations(allOptions);
+        }
+    </script>
+</body>
+</html>
