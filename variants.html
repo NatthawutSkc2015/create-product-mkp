@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>Dynamic Variants and Options Input</title>
     <style>
         body {
@@ -41,11 +42,11 @@
     <div id="variants">
         <!-- Dynamic Input Fields for Variants and Options -->
     </div>
-    <button onclick="addVariant()">Add Variant</button>
+    <button onclick="addVariant()" class="btn btn-primary btn-sm">Add Variant</button>
 
     <h2>Variant List</h2>
     <div class="variant-list">
-        <table>
+        <table class="table table-bordered">
             <thead>
                 <tr id="variant-header-row">
                     <th>Retail Price</th>
@@ -63,9 +64,9 @@
             const div = document.createElement('div');
             div.className = 'variant';
             div.innerHTML = `
-                <input type="text" placeholder="Enter variant name" class="variant-name" oninput="updateVariantList()">
-                <button onclick="addOption(this)">Add Option</button>
-                <button onclick="removeVariant(this)">Remove Variant</button>
+                <input type="text" placeholder="Enter variant name" class="form-control form-control-sm variant-name" oninput="updateVariantList()">
+                <button class="btn btn-primary btn-sm" onclick="addOption(this)">Add Option</button>
+                <button class="btn btn-danger btn-sm" onclick="removeVariant(this)">Remove Variant</button>
                 <div class="options"></div>
             `;
             container.appendChild(div);
@@ -77,8 +78,8 @@
             const optionDiv = document.createElement('div');
             optionDiv.className = 'option';
             optionDiv.innerHTML = `
-                <input type="text" placeholder="Enter option" oninput="updateVariantList()">
-                <button onclick="removeOption(this)">Remove Option</button>
+                <input type="text" class="form-control form-control-sm" placeholder="Enter option" oninput="updateVariantList()">
+                <button class="btn btn-danger btn-sm" onclick="removeOption(this)">Remove Option</button>
             `;
             optionsContainer.appendChild(optionDiv);
             updateVariantList();
@@ -137,9 +138,9 @@
 
                     // Add input fields for price, quantity, SKU
                     row.innerHTML += `
-                        <td><input type='text' placeholder='Enter price' name='skus[${index - 1}][qty]'></td>
-                        <td><input type='text' placeholder='Enter quantity' name='skus[${index - 1}][qty]'></td>
-                        <td><input type='text' placeholder='Enter SKU' name='skus[${index - 1}][sku]''></td>
+                        <td><input type='text' class='form-control form-control-sm' placeholder='Enter price' name='skus[${index - 1}][qty]'></td>
+                        <td><input type='text' class='form-control form-control-sm' placeholder='Enter quantity' name='skus[${index - 1}][qty]'></td>
+                        <td><input type='text' class='form-control form-control-sm' placeholder='Enter SKU' name='skus[${index - 1}][sku]''></td>
                     `;
                     tbody.appendChild(row);
                     return;
